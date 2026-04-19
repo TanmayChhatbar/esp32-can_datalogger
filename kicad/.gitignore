@@ -1,0 +1,5 @@
+esp32-can_datalogger-backups/*
+*.SLDPRT
+*.SLDASM
+*.lck
+export/*
