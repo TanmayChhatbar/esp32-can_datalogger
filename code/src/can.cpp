@@ -1,18 +1,20 @@
 #include "can.h"
 
-void setupCAN()
+TwaiCAN setupCAN(uint canSx, uint canTx, uint canRx)
 {
-    pinMode(CAN_SX, OUTPUT);
-    digitalWrite(CAN_SX, LOW); // HIGH for silent mode, (HIGH doesnt work for some reason, so just use LOW)
-    ESP32Can.setPins(CAN_TX, CAN_RX);
-    ESP32Can.setSpeed(ESP32Can.convertSpeed(500));
-    if (!ESP32Can.begin())
+    pinMode(canSx, OUTPUT);
+    digitalWrite(canSx, LOW); // HIGH for silent mode, (HIGH doesnt work for some reason, so just use LOW)
+    TwaiCAN can;
+    can.setPins(canTx, canRx);
+    can.setSpeed(can.convertSpeed(500));
+    if (!can.begin())
     {
         Serial.println("Failed to initialize CAN");
         while (1)
             ;
     }
     Serial.println("CAN initialized successfully");
+    return can;
 }
 
 void printMessageToSerialRaw(unsigned long long timestamp, CanFrame frame)
