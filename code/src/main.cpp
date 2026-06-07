@@ -3,12 +3,19 @@
 #include <ESP32-TWAI-CAN.hpp>
 #include "led.h"
 #include "can.h"
+#include "sd.h"
+#include "imu.h"
+#include "gps.h"
+
+TwaiCAN can0;
+TwaiCAN can1;
 
 void setup()
 {
     Serial.begin(460800);
 
-    setupCAN();
+    can0 = setupCAN(CAN0_SX, CAN0_TX, CAN0_RX);
+    can1 = setupCAN(CAN1_SX, CAN1_TX, CAN1_RX);
     setupLED();
 }
 
@@ -18,7 +25,7 @@ void loop()
     static unsigned long long lastReceptionTime = micros();
 
     CanFrame frame;
-    if (ESP32Can.readFrame(frame))
+    if (can0.readFrame(frame))
     {
         unsigned long long timestamp = micros() - startTime;
         printMessageToSerialRaw(timestamp, frame);
