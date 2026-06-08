@@ -17245,7 +17245,7 @@
 				)
 			)
 		)
-		(property "Value" "+3V3"
+		(property "Value" "+3.3V"
 			(at 214.63 22.86 0)
 			(show_name no)
 			(do_not_autoplace no)
