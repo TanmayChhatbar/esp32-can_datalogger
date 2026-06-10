@@ -7864,6 +7864,12 @@
 		(uuid "fc10e65c-8b2a-4ee3-8124-6d5d3325bff9")
 	)
 	(junction
+		(at 261.62 133.35)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "059fc0a0-46ac-4591-9d0c-e446d5b0d281")
+	)
+	(junction
 		(at 147.32 5.08)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -8054,6 +8060,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "94607d7a-cfeb-4a65-a703-d23bfbcf6957")
+	)
+	(junction
+		(at 236.22 133.35)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "98597cf2-57f0-4145-b882-c21e8219a571")
 	)
 	(junction
 		(at 162.56 -20.32)
@@ -8787,7 +8799,7 @@
 	)
 	(wire
 		(pts
-			(xy 261.62 130.81) (xy 264.16 130.81)
+			(xy 261.62 133.35) (xy 264.16 133.35)
 		)
 		(stroke
 			(width 0)
@@ -8864,16 +8876,6 @@
 			(type default)
 		)
 		(uuid "48c6268b-84a1-41cd-9260-e704888ba033")
-	)
-	(wire
-		(pts
-			(xy 212.09 130.81) (xy 212.09 133.35)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "48d9267a-5dc9-4aa2-a8bb-2bd796e008fb")
 	)
 	(wire
 		(pts
@@ -9027,16 +9029,6 @@
 	)
 	(wire
 		(pts
-			(xy 236.22 130.81) (xy 238.76 130.81)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "59b1213d-8c23-49bc-9348-d5a4dca5abae")
-	)
-	(wire
-		(pts
 			(xy 101.6 167.64) (xy 100.33 167.64)
 		)
 		(stroke
@@ -9124,16 +9116,6 @@
 			(type default)
 		)
 		(uuid "696a0b7b-9b09-48f9-88fa-f4a74e8a9229")
-	)
-	(wire
-		(pts
-			(xy 261.62 130.81) (xy 261.62 133.35)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "69e91494-a1ea-4178-b860-e44e3b7d5631")
 	)
 	(wire
 		(pts
@@ -9317,7 +9299,7 @@
 	)
 	(wire
 		(pts
-			(xy 212.09 130.81) (xy 214.63 130.81)
+			(xy 212.09 133.35) (xy 236.22 133.35)
 		)
 		(stroke
 			(width 0)
@@ -9604,16 +9586,6 @@
 			(type default)
 		)
 		(uuid "af6a066b-9337-4a6a-8f64-e51fc2303f11")
-	)
-	(wire
-		(pts
-			(xy 236.22 130.81) (xy 236.22 133.35)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "aff2b56a-4fec-4b87-8609-967a635b1e61")
 	)
 	(wire
 		(pts
@@ -10134,6 +10106,16 @@
 			(type default)
 		)
 		(uuid "e841e866-f932-4ecd-8cc3-1fedfdb32bd7")
+	)
+	(wire
+		(pts
+			(xy 236.22 133.35) (xy 261.62 133.35)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e95175dc-f11b-4c98-bf65-b64970ccb89e")
 	)
 	(wire
 		(pts
@@ -11005,30 +10987,6 @@
 			)
 		)
 	)
-	(global_label "VOUT"
-		(shape input)
-		(at 214.63 130.81 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "44e42f3b-21c2-461e-8ec8-ae1af71e5c28")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 222.3324 130.81 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-	)
 	(global_label "GPS_FIX"
 		(shape input)
 		(at 54.61 48.26 0)
@@ -11389,30 +11347,6 @@
 			)
 		)
 	)
-	(global_label "VOUT"
-		(shape input)
-		(at 264.16 130.81 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "b0a2b97b-fed9-4baa-b420-b24d11408e1f")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 271.8624 130.81 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-	)
 	(global_label "I2C_SDA"
 		(shape input)
 		(at 220.98 162.56 180)
@@ -11530,30 +11464,6 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
-			)
-		)
-	)
-	(global_label "VOUT"
-		(shape input)
-		(at 238.76 130.81 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "ec3c0244-bc9f-4de9-8c23-595242cdeaac")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 246.4624 130.81 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
 			)
 		)
 	)
@@ -13677,7 +13587,7 @@
 				)
 			)
 		)
-		(property "Value" "+3V3"
+		(property "Value" "+3.3V"
 			(at 260.35 109.22 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16617,7 +16527,7 @@
 				)
 			)
 		)
-		(property "Value" "+3V3"
+		(property "Value" "+3.3V"
 			(at 217.17 86.36 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17858,6 +17768,84 @@
 	)
 	(symbol
 		(lib_id "power:+3.3V")
+		(at 264.16 133.35 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ac4e2112-ccc1-455f-9264-0d8f18b460d8")
+		(property "Reference" "#PWR057"
+			(at 264.16 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3.3V"
+			(at 264.16 128.27 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 264.16 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 264.16 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
+			(at 264.16 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c2abac05-5249-4a7e-b447-0d1236252d1a")
+		)
+		(instances
+			(project "esp32-can_datalogger"
+				(path "/27d88dad-6a90-4f6f-a0dd-ec7ff61f0111"
+					(reference "#PWR057")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3.3V")
 		(at 298.45 80.01 0)
 		(unit 1)
 		(body_style 1)
@@ -18801,7 +18789,7 @@
 				)
 			)
 		)
-		(property "Value" "+3V3"
+		(property "Value" "+3.3V"
 			(at 111.76 180.34 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -19394,7 +19382,7 @@
 				)
 			)
 		)
-		(property "Value" "+3V3"
+		(property "Value" "+3.3V"
 			(at 307.594 75.946 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -19839,7 +19827,7 @@
 				)
 			)
 		)
-		(property "Value" "+3V3"
+		(property "Value" "+3.3V"
 			(at 140.97 166.37 0)
 			(show_name no)
 			(do_not_autoplace no)
