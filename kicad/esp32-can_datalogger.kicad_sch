@@ -12637,7 +12637,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "1704743c-3382-4536-bd37-08e319018512")
-		(property "Reference" "J4"
+		(property "Reference" "J6"
 			(at 147.32 15.24 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12744,7 +12744,7 @@
 		(instances
 			(project "esp32-can_datalogger"
 				(path "/27d88dad-6a90-4f6f-a0dd-ec7ff61f0111"
-					(reference "J4")
+					(reference "J6")
 					(unit 1)
 				)
 			)
@@ -13235,7 +13235,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "25c75eb9-bf47-48ab-bba6-fb8886129900")
-		(property "Reference" "J6"
+		(property "Reference" "J7"
 			(at 287.02 52.832 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13299,7 +13299,7 @@
 		(instances
 			(project "esp32-can_datalogger"
 				(path "/27d88dad-6a90-4f6f-a0dd-ec7ff61f0111"
-					(reference "J6")
+					(reference "J7")
 					(unit 1)
 				)
 			)
@@ -15793,8 +15793,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "67ceebc1-40fd-4163-8743-70ccdb8d9cfc")
-		(property "Reference" "J8"
-			(at 97.79 -40.64 0)
+		(property "Reference" "J4"
+			(at 97.79 -39.37 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -15804,7 +15804,7 @@
 			)
 		)
 		(property "Value" "USB_C_Receptacle_USB2.0_16P"
-			(at 97.79 -38.1 0)
+			(at 97.79 -36.83 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -15900,7 +15900,7 @@
 		(instances
 			(project "esp32-can_datalogger"
 				(path "/27d88dad-6a90-4f6f-a0dd-ec7ff61f0111"
-					(reference "J8")
+					(reference "J4")
 					(unit 1)
 				)
 			)
@@ -16604,7 +16604,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "7823a527-123e-4ecc-b565-0c452d205de6")
-		(property "Reference" "J7"
+		(property "Reference" "J8"
 			(at 89.662 189.23 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16751,7 +16751,7 @@
 		(instances
 			(project "esp32-can_datalogger"
 				(path "/27d88dad-6a90-4f6f-a0dd-ec7ff61f0111"
-					(reference "J7")
+					(reference "J8")
 					(unit 1)
 				)
 			)
@@ -17432,6 +17432,85 @@
 	)
 	(symbol
 		(lib_id "power:GND")
+		(at 261.62 148.59 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "8f17c9c9-de23-4a50-81c4-230ca3321a09")
+		(property "Reference" "#PWR061"
+			(at 261.62 154.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 264.16 149.8599 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 261.62 148.59 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 261.62 148.59 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 261.62 148.59 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "9ee8e7df-2ca9-4e94-bd34-56b9dd69e8d9")
+		)
+		(instances
+			(project "esp32-can_datalogger"
+				(path "/27d88dad-6a90-4f6f-a0dd-ec7ff61f0111"
+					(reference "#PWR061")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
 		(at 97.79 5.08 0)
 		(unit 1)
 		(body_style 1)
@@ -17834,8 +17913,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a3ba07ee-5783-4451-90fe-3750768d3d2e")
-		(property "Reference" "J9"
-			(at 147.32 -40.64 0)
+		(property "Reference" "J5"
+			(at 147.32 -39.37 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -17845,7 +17924,7 @@
 			)
 		)
 		(property "Value" "USB_C_Receptacle_USB2.0_16P"
-			(at 147.32 -38.1 0)
+			(at 147.32 -36.83 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -17941,7 +18020,7 @@
 		(instances
 			(project "esp32-can_datalogger"
 				(path "/27d88dad-6a90-4f6f-a0dd-ec7ff61f0111"
-					(reference "J9")
+					(reference "J5")
 					(unit 1)
 				)
 			)
@@ -20222,7 +20301,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "dbdc8b02-cc89-46c9-9721-bba95da175b7")
-		(property "Reference" "JP4"
+		(property "Reference" "JP3"
 			(at 64.77 64.7699 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -20311,7 +20390,7 @@
 		(instances
 			(project "esp32-can_datalogger"
 				(path "/27d88dad-6a90-4f6f-a0dd-ec7ff61f0111"
-					(reference "JP4")
+					(reference "JP3")
 					(unit 1)
 				)
 			)
@@ -21303,7 +21382,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f2f3c25a-f3a3-4adf-b1ba-bf11c2964a31")
-		(property "Reference" "J5"
+		(property "Reference" "J9"
 			(at 227.33 165.0999 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -21373,7 +21452,7 @@
 		(instances
 			(project "esp32-can_datalogger"
 				(path "/27d88dad-6a90-4f6f-a0dd-ec7ff61f0111"
-					(reference "J5")
+					(reference "J9")
 					(unit 1)
 				)
 			)
