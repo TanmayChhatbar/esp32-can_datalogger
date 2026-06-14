@@ -7899,7 +7899,19 @@
 		(uuid "5df06910-e0cb-4d98-8c40-b30f16c7463b")
 	)
 	(rectangle
-		(start 81.28 12.7)
+		(start 20.32 -26.67)
+		(end 62.23 -1.27)
+		(stroke
+			(width 0)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "666c6e67-8ea5-4e8b-8470-80112bdeb2bb")
+	)
+	(rectangle
+		(start 81.28 -41.91)
 		(end 185.42 121.92)
 		(stroke
 			(width 0)
@@ -8051,6 +8063,12 @@
 		(uuid "15c0f966-5330-4aca-9197-aec53b9e4df6")
 	)
 	(junction
+		(at 26.67 -16.51)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "16c0db95-fb8f-41ce-8fde-634e0248db1c")
+	)
+	(junction
 		(at 147.32 114.3)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -8138,7 +8156,7 @@
 		(at 52.07 -16.51)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "4c6c2f6d-a958-44ef-b564-dc61f49457cc")
+		(uuid "48e2ce10-9ee4-47f3-84d0-b8085b3d8ce2")
 	)
 	(junction
 		(at 194.31 48.26)
@@ -8295,12 +8313,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "db2cba7b-d321-448a-85f9-f94a69b302ee")
-	)
-	(junction
-		(at 26.67 -16.51)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "e2277b93-b734-4f3a-89b9-68ea3c30a699")
 	)
 	(junction
 		(at 97.79 60.96)
@@ -8481,6 +8493,16 @@
 			(type default)
 		)
 		(uuid "00ec18a6-9ff0-4565-a824-2be79b62df34")
+	)
+	(wire
+		(pts
+			(xy 52.07 -19.05) (xy 52.07 -16.51)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "013b3d15-a249-4e1b-b6ef-e1749d9e5979")
 	)
 	(wire
 		(pts
@@ -9331,6 +9353,16 @@
 			(type default)
 		)
 		(uuid "6e0a1e10-52e0-45b9-8a23-5f446f87bbdf")
+	)
+	(wire
+		(pts
+			(xy 26.67 -19.05) (xy 26.67 -16.51)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6e89662e-fcf9-49f9-9a39-fa9e2e9c5598")
 	)
 	(wire
 		(pts
@@ -10986,6 +11018,30 @@
 			)
 		)
 	)
+	(global_label "GPS_TX"
+		(shape input)
+		(at 24.13 33.02 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "05874fc3-d52a-4d4e-b79a-ca80deb0a2c7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 14.2506 33.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
 	(global_label "CS_SD"
 		(shape input)
 		(at 128.27 177.8 180)
@@ -11103,6 +11159,30 @@
 					(size 1.27 1.27)
 				)
 				(justify left)
+			)
+		)
+	)
+	(global_label "GPS_RX"
+		(shape input)
+		(at 24.13 30.48 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "1b237c28-6557-4023-9a5c-a28e37f93af5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 13.9482 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
 			)
 		)
 	)
@@ -11466,30 +11546,6 @@
 			)
 		)
 	)
-	(global_label "GPS_RX"
-		(shape input)
-		(at 24.13 33.02 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "8eb69735-eb88-4b53-8ad8-c7ccee3ea46e")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 13.9482 33.02 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
 	(global_label "SCK"
 		(shape input)
 		(at 217.17 104.14 180)
@@ -11527,30 +11583,6 @@
 		(uuid "a441f175-57cb-476c-a241-b507669826f7")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 119.2977 186.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
-	(global_label "GPS_TX"
-		(shape input)
-		(at 24.13 30.48 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "a5949d21-3d52-4ae6-9d93-d65cdb67c9ff")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 14.2506 30.48 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16963,7 +16995,7 @@
 	)
 	(symbol
 		(lib_id "power:+5V")
-		(at 26.67 -16.51 0)
+		(at 26.67 -19.05 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -16973,7 +17005,7 @@
 		(dnp no)
 		(uuid "7ab81cbe-84bf-49de-8769-e2370ba563d3")
 		(property "Reference" "#PWR059"
-			(at 26.67 -12.7 0)
+			(at 26.67 -15.24 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16984,7 +17016,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 26.67 -20.066 0)
+			(at 26.67 -22.606 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -16994,7 +17026,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 26.67 -16.51 0)
+			(at 26.67 -19.05 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17005,7 +17037,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 26.67 -16.51 0)
+			(at 26.67 -19.05 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17016,7 +17048,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 26.67 -16.51 0)
+			(at 26.67 -19.05 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17825,7 +17857,7 @@
 	)
 	(symbol
 		(lib_id "power:+3.3V")
-		(at 52.07 -16.51 0)
+		(at 52.07 -19.05 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -17835,7 +17867,7 @@
 		(dnp no)
 		(uuid "a1ece0c7-fb18-4c7b-82d6-3d068ee34bcd")
 		(property "Reference" "#PWR058"
-			(at 52.07 -12.7 0)
+			(at 52.07 -15.24 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17846,7 +17878,7 @@
 			)
 		)
 		(property "Value" "+1V8"
-			(at 54.864 -20.066 0)
+			(at 54.864 -22.606 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -17856,7 +17888,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 52.07 -16.51 0)
+			(at 52.07 -19.05 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17867,7 +17899,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 52.07 -16.51 0)
+			(at 52.07 -19.05 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17878,7 +17910,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
-			(at 52.07 -16.51 0)
+			(at 52.07 -19.05 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -19702,10 +19734,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "c8d9e970-8d85-455f-92fa-2d74af6a4d78")
 		(property "Reference" "U4"
-			(at 39.37 -21.59 0)
+			(at 39.37 -22.86 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -19715,7 +19746,7 @@
 			)
 		)
 		(property "Value" "AZ1117-1.8"
-			(at 39.37 -19.05 0)
+			(at 39.37 -20.32 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
