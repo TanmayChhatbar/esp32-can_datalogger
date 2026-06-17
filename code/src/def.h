@@ -14,20 +14,20 @@
 #define GPS_FIX 14
 
 // SPI
-#define MOSI 5
-#define MISO 6
-#define SCK 7
+#define SPI_MOSI 5
+#define SPI_MISO 6
+#define SPI_SCK 7
 
 // IMU
-#define CS_IMU 4
+#define SPI_CS_IMU 4
 
 // SD card
-#define CS_SD 18
+#define SPI_CS_SD 18
 #define SD_CD 21
 
 // I2C
-#define SDA 20
-#define SCL 19
+#define I2C_SDA 20
+#define I2C_SCL 19
 #define I2C_DISP 0x3C // TODO
 
 // IO
