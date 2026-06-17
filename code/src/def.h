@@ -32,4 +32,5 @@
 
 // IO
 #define ARGB_LED 9
+#define NUM_LED 3
 #define BUTS 22
