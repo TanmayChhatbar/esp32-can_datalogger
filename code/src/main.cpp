@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <FastLED.h>
 #include <ESP32-TWAI-CAN.hpp>
+#include "def.h"
 #include "led.h"
 #include "can.h"
 #include "sd.h"
