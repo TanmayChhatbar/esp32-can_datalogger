@@ -62,38 +62,47 @@ void loop()
     static unsigned long long currentTime = startTime;
     currentTime = micros();
 
-    // read CAN data
     CanFrame frame;
-    if (can0.readFrame(frame))
+    // if (can0.readFrame(frame))
+    // only print OBD data
+    if (can0.readFrame(frame) && frame.identifier >= 0x7E8 && frame.identifier <= 0x7EF)
     {
         unsigned long long timestamp = currentTime - startTime;
-        if (frame.identifier != 0x7E8)
+        switch (frame.data[2])
         {
+        case OBD_ENGINE_RPM:
+        {
+            Serial.print(timestamp);
+            float engine_rpm = (frame.data[3] * 256 + frame.data[4]) / 4.0;
+            Serial.println("\tEngine Speed:\t" + String(engine_rpm) + "rpm");
+            break;
+        }
+
+        case OBD_VEHICLE_SPEED:
+        {
+            Serial.print(timestamp);
+            float vehicle_speed = frame.data[3];
+            Serial.println("\tVehicle Speed:\t" + String(vehicle_speed) + "km/h");
+            break;
+        }
+        case OBD_GEAR_POSITION:
+        {
+            Serial.print(timestamp);
             printMessageToSerialRaw(timestamp, frame);
-            toggleLED();
+            // float gear_pos = (frame.data[3] * 256 + frame.data[4]) / 100.0;
+            // Serial.println("\tGear:\t" + String(gear_pos))
+        }
         }
         lastReceptionTime = currentTime;
     }
 
     // request OBD signals
-    if (currentTime - lastRequestTime_1Hz > 1000000)
+    if (currentTime - lastRequestTime_1Hz > 100000)
     {
         bool success = true;
-        for (OBD_signal signal : OBD_SIGNALS_OF_INTEREST_1HZ)
-        {
-            success = success && requestOBDSignal(can0, signal);
-        }
-        if (!success)
-        {
-            Serial.print(currentTime - startTime);
-            Serial.println("\tFailed to send OBD request (1Hz)");
-        }
-        lastRequestTime_1Hz = currentTime;
-    }
-    if (currentTime - lastRequestTime_10Hz > 100000)
-    {
-        bool success = true;
-        for (OBD_signal signal : OBD_SIGNALS_OF_INTEREST_10HZ)
+        // TODO only last request is replied to
+        // for (OBD_signal signal : {OBD_SIGNALS_OF_INTEREST_10HZ})
+        for (OBD_signal signal : {OBD_GEAR_POSITION})
         {
             success = success && requestOBDSignal(can0, signal);
         }
@@ -102,13 +111,27 @@ void loop()
             Serial.print(currentTime - startTime);
             Serial.println("\tFailed to send OBD request (10Hz)");
         }
-        lastRequestTime_10Hz = currentTime;
+        lastRequestTime_1Hz = currentTime;
     }
+    // if (currentTime - lastRequestTime_1Hz > 1000000)
+    // {
+    //     bool success = true;
+    //     for (OBD_signal signal : OBD_SIGNALS_OF_INTEREST_1HZ)
+    //     {
+    //         success = success && requestOBDSignal(can0, signal);
+    //     }
+    //     if (!success)
+    //     {
+    //         Serial.print(currentTime - startTime);
+    //         Serial.println("\tFailed to send OBD request (10Hz)");
+    //     }
+    //     lastRequestTime_1Hz = currentTime;
+    // }
 
     // print CAN timeout if no frames received
     if (currentTime - lastReceptionTime > 2000000)
     {
-        Serial.println("Waiting for CAN frames...");
+        Serial.println("Waiting for OBD response...");
         lastReceptionTime = currentTime;
         toggleLED();
     }
