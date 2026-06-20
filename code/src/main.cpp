@@ -12,6 +12,38 @@ TwaiCAN can0;
 #if TWO_CAN
 TwaiCAN can1;
 #endif
+volatile uint OBD_sigCount_1Hz_index = 0;
+volatile uint OBD_sigCount_10Hz_index = 0;
+volatile OBD_signal OBD_1Hz_ID = OBD_SIGNALS_OF_INTEREST_1HZ[0];
+volatile OBD_signal OBD_10Hz_ID = OBD_SIGNALS_OF_INTEREST_10HZ[0];
+volatile unsigned long long lastOBDRequestTime_1Hz = 0;
+volatile unsigned long long lastOBDRequestTime_10Hz = 0;
+
+void vTask_OBD_Request_1Hz(void *parameter)
+{
+    const TickType_t period = pdMS_TO_TICKS(1000);
+    TickType_t lastWake = xTaskGetTickCount();
+
+    for (;;)
+    {
+        OBD_signal target = OBD_SIGNALS_OF_INTEREST_1HZ[OBD_sigCount_1Hz_index];
+        if (target != OBD_1Hz_ID || micros() - lastOBDRequestTime_1Hz > 200000)
+        {
+            OBD_1Hz_ID = target;
+
+            if (!requestOBDSignal(can0, OBD_1Hz_ID))
+            {
+                Serial.println("Failed to send OBD request (1Hz)");
+            }
+            else
+            {
+                lastOBDRequestTime_1Hz = micros();
+            }
+        }
+
+        vTaskDelayUntil(&lastWake, period);
+    }
+}
 
 void setup()
 {
@@ -22,35 +54,29 @@ void setup()
 
     // set up GPS
     if (!setupGPS())
-    {
         Serial.println("Failed to set up GPS");
-    }
 
     // set up IMU
     if (!setupIMU())
-    {
         Serial.println("Failed to set up IMU");
-    }
 
     // set up SD card
     if (!setupSD())
-    {
         Serial.println("Failed to set up SD card");
-    }
 
     // set up CAN buses
     TwaiCAN can0;
     if (!setupCAN(can0, CAN0_SX, CAN0_TX, CAN0_RX))
-    {
         Serial.println("Failed to set up CAN bus 0");
-    }
+
 #if TWO_CAN
     TwaiCAN can1;
     if (!setupCAN(can1, CAN1_SX, CAN1_TX, CAN1_RX))
-    {
         Serial.println("Failed to set up CAN bus 1");
-    }
 #endif
+
+    // init tasks
+    xTaskCreatePinnedToCore(vTask_OBD_Request_1Hz, "OBD_Request_1Hz", 4096, NULL, 1, NULL, 0);
 }
 
 void loop()
@@ -63,9 +89,7 @@ void loop()
     currentTime = micros();
 
     CanFrame frame;
-    // if (can0.readFrame(frame))
-    // only print OBD data
-    if (can0.readFrame(frame) && frame.identifier >= 0x7E8 && frame.identifier <= 0x7EF)
+    if (can0.readFrame(frame) && (frame.identifier >= 0x7E8 && frame.identifier <= 0x7EF))
     {
         unsigned long long timestamp = currentTime - startTime;
         switch (frame.data[2])
@@ -94,6 +118,13 @@ void loop()
         }
         }
         lastReceptionTime = currentTime;
+
+        uint8_t mode = frame.data[1]; // should be 0x41 for response to 01
+        uint8_t pid = frame.data[2];
+        if (mode == 0x41 && pid == OBD_1Hz_ID)
+        {
+            OBD_sigCount_1Hz_index = (OBD_sigCount_1Hz_index + 1) % OBD_SIGCOUNT_1HZ; // cycle through requested OBD signals
+        }
     }
 
     // request OBD signals
