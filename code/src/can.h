@@ -21,7 +21,7 @@ const OBD_signal OBD_SIGNALS_OF_INTEREST_1HZ[] = {OBD_FUEL_LEVEL};
 const OBD_signal OBD_SIGNALS_OF_INTEREST_10HZ[] = {OBD_ENGINE_LOAD, OBD_VEHICLE_SPEED};
 
 bool setupCAN(TwaiCAN &can, uint canSx, uint canTx, uint canRx);
-void printMessageToSerialRaw(unsigned long long timestamp, CanFrame frame);
+void printMessageToSerialRaw(unsigned long long timestamp, CanFrame frame, uint8_t bus = 0);
 void printMessageToSerial(unsigned long long timestamp, CanFrame frame);
 bool requestOBDSignal(TwaiCAN &can, OBD_signal signal);
 
