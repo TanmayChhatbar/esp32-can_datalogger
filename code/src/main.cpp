@@ -112,7 +112,7 @@ void loop()
         case OBD_GEAR_POSITION:
         {
             Serial.print(timestamp);
-            printMessageToSerialRaw(timestamp, frame);
+            printMessageToSerialRaw(timestamp, frame, 0);
             // float gear_pos = (frame.data[3] * 256 + frame.data[4]) / 100.0;
             // Serial.println("\tGear:\t" + String(gear_pos))
         }
