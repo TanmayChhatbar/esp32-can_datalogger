@@ -4,7 +4,7 @@
 #include "pindef.h"
 #include "led.h"
 #include "can.h"
-#include "sd.h"
+#include "sd_logger.h"
 #include "imu.h"
 #include "gps.h"
 
@@ -59,7 +59,7 @@ void setup()
         Serial.println("Failed to set up IMU");
 
     // set up SD card
-    if (!setupSD())
+    if (!SD.begin(SPI_CS_SD))
         Serial.println("Failed to set up SD card");
 
     // set up CAN buses
