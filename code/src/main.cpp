@@ -88,31 +88,6 @@ void loop()
     if (can0.readFrame(frame) && (frame.identifier >= 0x7E8 && frame.identifier <= 0x7EF))
     {
         unsigned long long timestamp = currentTime - startTime;
-        switch (frame.data[2])
-        {
-        case OBD_ENGINE_RPM:
-        {
-            Serial.print(timestamp);
-            float engine_rpm = (frame.data[3] * 256 + frame.data[4]) / 4.0;
-            Serial.println("\tEngine Speed:\t" + String(engine_rpm) + "rpm");
-            break;
-        }
-
-        case OBD_VEHICLE_SPEED:
-        {
-            Serial.print(timestamp);
-            float vehicle_speed = frame.data[3];
-            Serial.println("\tVehicle Speed:\t" + String(vehicle_speed) + "km/h");
-            break;
-        }
-        case OBD_GEAR_POSITION:
-        {
-            Serial.print(timestamp);
-            printMessageToSerialRaw(timestamp, frame, 0);
-            // float gear_pos = (frame.data[3] * 256 + frame.data[4]) / 100.0;
-            // Serial.println("\tGear:\t" + String(gear_pos))
-        }
-        }
         lastReceptionTime = currentTime;
 
         uint8_t mode = frame.data[1]; // should be 0x41 for response to 01
