@@ -9,9 +9,7 @@
 #include "gps.h"
 
 TwaiCAN can0;
-#if TWO_CAN
 TwaiCAN can1;
-#endif
 volatile uint OBD_sigCount_1Hz_index = 0;
 volatile uint OBD_sigCount_10Hz_index = 0;
 volatile OBD_signal OBD_1Hz_ID = OBD_SIGNALS_OF_INTEREST_1HZ[0];
@@ -69,11 +67,9 @@ void setup()
     if (!setupCAN(can0, CAN0_SX, CAN0_TX, CAN0_RX))
         Serial.println("Failed to set up CAN bus 0");
 
-#if TWO_CAN
     TwaiCAN can1;
     if (!setupCAN(can1, CAN1_SX, CAN1_TX, CAN1_RX))
         Serial.println("Failed to set up CAN bus 1");
-#endif
 
     // init tasks
     xTaskCreatePinnedToCore(vTask_OBD_Request_1Hz, "OBD_Request_1Hz", 4096, NULL, 1, NULL, 0);

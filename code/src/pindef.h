@@ -1,18 +1,13 @@
 #pragma once
 
 // CAN
-#if TWO_CAN
 #define CAN0_TX 0
 #define CAN0_RX 1
 #define CAN0_SX 15
 #define CAN1_TX 2
 #define CAN1_RX 3
 #define CAN1_SX CAN0_SX
-#else
-#define CAN0_TX 10
-#define CAN0_RX 11
-#define CAN0_SX 12
-#endif
+
 // GPS
 // #define GPS_TX TODO
 // #define GPS_RX TODO
