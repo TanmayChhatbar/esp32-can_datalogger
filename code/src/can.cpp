@@ -17,34 +17,46 @@ bool setupCAN(TwaiCAN &can, uint canSx, uint canTx, uint canRx)
     return true;
 }
 
-void printMessageToSerialRaw(unsigned long long timestamp, CanFrame frame, uint8_t bus = 0)
+void printMessageToSerialRaw(const unsigned long long timestamp, const CanFrame frame, const uint8_t bus)
 {
     // TimeStamp,ID,Extended,Dir,Bus,LEN,D1,D2,D3,D4,D5,D6,D7,D8
     // 1781966822488000,0000020A,false,Rx,0,8,7A,8C,00,00,00,01,23,00,
-    Serial.printf("%.3f,", (float)(timestamp) / 1000000.0f); // TODO change to posix time in us
-    Serial.print(frame.identifier, HEX);
-    Serial.print(",");
-    Serial.print(frame.extd ? "1" : "0");
-    Serial.print(",");
-    Serial.print(frame.rtr ? "1" : "0");
-    Serial.print(",");
-    Serial.print(bus);
-    Serial.print(",");
-    Serial.print(frame.data_length_code);
-    Serial.print(",");
+    // Serial.printf("%.3f,", (float)(timestamp) / 1000000.0f); // TODO change to posix time in us
+    // Serial.print(frame.identifier, HEX);
+    // Serial.print(",");
+    // Serial.print(frame.extd ? "1" : "0");
+    // Serial.print(",");
+    // Serial.print(frame.rtr ? "1" : "0");
+    // Serial.print(",");
+    // Serial.print(bus);
+    // Serial.print(",");
+    // Serial.print(frame.data_length_code);
+    // Serial.print(",");
+    // for (int i = 0; i < frame.data_length_code; i++)
+    // {
+    //     if (frame.data[i] < 0x10)
+    //         Serial.print("0");
+    //     Serial.print(frame.data[i], HEX);
+    //     Serial.print(",");
+    // }
+    // Serial.println();
+    Serial.println(CanFrameToString(frame, timestamp, bus));
+}
+
+String CanFrameToString(const CanFrame &frame, const unsigned long long timestamp, const uint8_t bus)
+{
+    String outString = String((float)timestamp / 1000000.0f, 3) + "," + 
+                        String(frame.identifier, HEX) + "," + 
+                        String(frame.extd ? "1" : "0") + "," + 
+                        String(frame.rtr ? "1" : "0") + "," + 
+                        String(frame.data_length_code) + ",";
     for (int i = 0; i < frame.data_length_code; i++)
     {
         if (frame.data[i] < 0x10)
-            Serial.print("0");
-        Serial.print(frame.data[i], HEX);
-        Serial.print(",");
+            outString += "0";
+        outString += String(frame.data[i], HEX) + ",";
     }
-    Serial.println();
-}
-
-void printMessageToSerial(unsigned long long timestamp, CanFrame frame)
-{
-    // TODO
+    return outString;
 }
 
 bool requestOBDSignal(TwaiCAN &can, OBD_signal signal)
