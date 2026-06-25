@@ -33,10 +33,10 @@ NS_ :
 
 BS_: 
 BU_: 
-BO_ 2147484182 0x216: 8 Vector__XXX
+BO_ 534 Msg_216: 8 Vector__XXX
    SG_ Throttle_Position : 7|8@0+ (0.571,-19.414) [0|100] "%" Vector__XXX
 
-BO_ 2147484170 0X20A: 8 Vector__XXX
+BO_ 522 Msg_20A: 8 Vector__XXX
    SG_ Engine_Speed : 23|16@0+ (0.4,0) [0|26214.4] "RPM" Vector__XXX
 
 BA_DEF_ BO_ "GenMsgBackgroundColor" STRING ;
@@ -47,4 +47,4 @@ BA_DEF_DEF_ "GenMsgBackgroundColor" "#ffffff";
 BA_DEF_DEF_ "GenMsgForegroundColor" "#000000";
 BA_DEF_DEF_ "matchingcriteria" 0;
 BA_DEF_DEF_ "filterlabeling" 1;
-BA_ "GenMsgForegroundColor" BO_ 2147484182 "#000000";
+BA_ "GenMsgForegroundColor" BO_ 534 "#000000";
