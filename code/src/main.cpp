@@ -175,5 +175,8 @@ void loop()
         toggleLED();
     }
 
-    delay(10);
+    // handle user input for IO
+    // TODO
+
+    delay(50);
 }
