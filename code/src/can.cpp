@@ -8,13 +8,7 @@ bool setupCAN(TwaiCAN &can, uint canSx, uint canTx, uint canRx)
     can.setSpeed(can.convertSpeed(500));
     can.setTxQueueSize(10); // TODO check if needed
     can.setRxQueueSize(10);
-    if (!can.begin())
-    {
-        Serial.println("Failed to initialize CAN");
-        return false;
-    }
-    Serial.println("CAN initialized successfully");
-    return true;
+    return can.begin();
 }
 
 void printMessageToSerialRaw(const unsigned long long timestamp, const CanFrame frame, const uint8_t bus)
