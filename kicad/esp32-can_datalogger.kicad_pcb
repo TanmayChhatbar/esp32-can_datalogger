@@ -6296,6 +6296,17 @@
 			)
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/dl/ESP32 C6 Supermini.step"
+			(offset
+				(xyz 9 11.7 0.1)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -0 -0 -180)
+			)
+		)
 	)
 	(footprint "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
 		(layer "F.Cu")
@@ -16035,6 +16046,17 @@
 			(uuid "6b60d396-01e6-4ed2-9b1d-06c40fda3a48")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/dl/MSD-4-A.step"
+			(offset
+				(xyz -7.5 -7.5 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -90 -0 -0)
+			)
+		)
 	)
 	(footprint "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder"
 		(layer "B.Cu")
@@ -20213,38 +20235,6 @@
 		(uuid "5a1eeb31-aad2-41b9-a54f-6d59d6e39819")
 	)
 	(segment
-		(start 75.925 79.625)
-		(end 83.75 71.8)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "GPS_TX")
-		(uuid "5cd13bfc-3426-4d5c-9fff-ec05c507a1c6")
-	)
-	(segment
-		(start 75.925 80.5)
-		(end 75.925 79.625)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "GPS_TX")
-		(uuid "cfbfb74e-bb13-4107-8720-4e0f9d4cd199")
-	)
-	(segment
-		(start 123.58 71.8)
-		(end 126 74.22)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "GPS_TX")
-		(uuid "d15038a5-f49d-47aa-9843-7ef6d906604a")
-	)
-	(segment
-		(start 83.75 71.8)
-		(end 123.58 71.8)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "GPS_TX")
-		(uuid "e85c8961-0907-429f-b437-455250307082")
-	)
-	(segment
 		(start 76.95 77.5)
 		(end 83.45 71)
 		(width 0.25)
@@ -20275,6 +20265,38 @@
 		(layer "F.Cu")
 		(net "GPS_RX")
 		(uuid "f47e2932-14d4-4f57-8b45-3e933560cec4")
+	)
+	(segment
+		(start 75.925 79.625)
+		(end 83.75 71.8)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "GPS_TX")
+		(uuid "5cd13bfc-3426-4d5c-9fff-ec05c507a1c6")
+	)
+	(segment
+		(start 75.925 80.5)
+		(end 75.925 79.625)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "GPS_TX")
+		(uuid "cfbfb74e-bb13-4107-8720-4e0f9d4cd199")
+	)
+	(segment
+		(start 123.58 71.8)
+		(end 126 74.22)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "GPS_TX")
+		(uuid "d15038a5-f49d-47aa-9843-7ef6d906604a")
+	)
+	(segment
+		(start 83.75 71.8)
+		(end 123.58 71.8)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "GPS_TX")
+		(uuid "e85c8961-0907-429f-b437-455250307082")
 	)
 	(segment
 		(start 75 112.5)
