@@ -1,19 +1,15 @@
 #include "sd_logger.h"
 
-bool writeCanFrameToSD(const CanFrame &frame, unsigned long long timestamp, const uint8_t bus)
+bool writeCanFrameToSD(const CanFrame &frame, unsigned long long timestamp, const uint8_t bus, File &file)
 {
-    Serial.println("SD TODO " + CanFrameToString(frame, timestamp, bus));
+    String can_data_str = CanFrameToString(frame, timestamp, bus);
+    file.println(can_data_str);
     return true;
 }
 
-File createNewLogFile(const String filename)
+bool writeCANHeaderToSD(File &file)
 {
-    Serial.println("SD TODO createNewLogFile: " + filename);
-    return File();
-}
-
-bool writeToFile(File &file, const String &data)
-{
-    Serial.println("SD TODO writeToFile: " + data);
+    String header = "Timestamp,ID,Extended,Dir,Bus,LEN,D1,D2,D3,D4,D5,D6,D7,D8";
+    file.println(header);
     return true;
 }

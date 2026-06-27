@@ -3,8 +3,15 @@
 #include "can.h"
 #include <SPI.h>
 #include <SD.h>
-#include <FS.h>
 
-bool writeCanFrameToSD(const CanFrame &frame, unsigned long long timestamp, const uint8_t bus);
-File createNewLogFile(const String filename);
-bool writeToFile(File &file, const String &data);
+enum logging_mode_t
+{
+    LOGGING_MODE_WAITGPS = -1,
+    LOGGING_MODE_INACTIVE = 0,
+    LOGGING_MODE_STOP = 1,
+    LOGGING_MODE_START = 2,
+    LOGGING_MODE_ACTIVE = 3
+};
+
+bool writeCanFrameToSD(const CanFrame &frame, unsigned long long timestamp, const uint8_t bus, File &file);
+bool writeCANHeaderToSD(File &file);

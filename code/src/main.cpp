@@ -16,12 +16,15 @@ volatile OBD_signal OBD_1Hz_ID = OBD_SIGNALS_OF_INTEREST_1HZ[0];   // current OB
 volatile OBD_signal OBD_10Hz_ID = OBD_SIGNALS_OF_INTEREST_10HZ[0]; // current OBD signal for which response is expected, -1 means no signal requested yet for delay between request batches
 volatile unsigned long long lastOBDRequestTime_1Hz_us = 0;
 volatile unsigned long long lastOBDRequestTime_10Hz_us = 0;
+logging_mode_t logging_mode = LOGGING_MODE_INACTIVE;
+bool stopOBDTask_1Hz = false;
+bool stopOBDTask_10Hz = false;
 
 void vTask_OBD_Request_1Hz(void *parameter)
 {
     TickType_t lastWake = xTaskGetTickCount();
 
-    for (;;)
+    while (!stopOBDTask_1Hz)
     {
         // if starting fresh, wait 1Hz equivalent time
         if (OBD_sigCount_1Hz_index == -1)
@@ -48,13 +51,16 @@ void vTask_OBD_Request_1Hz(void *parameter)
             }
         }
     }
+
+    stopOBDTask_1Hz = false;
+    vTaskDelete(NULL);
 }
 
 void vTask_OBD_Request_10Hz(void *parameter)
 {
     TickType_t lastWake = xTaskGetTickCount();
 
-    for (;;)
+    while (!stopOBDTask_10Hz)
     {
         // if starting fresh, wait 1Hz equivalent time
         if (OBD_sigCount_10Hz_index == -1)
@@ -81,6 +87,9 @@ void vTask_OBD_Request_10Hz(void *parameter)
             }
         }
     }
+
+    stopOBDTask_10Hz = false;
+    vTaskDelete(NULL);
 }
 
 void setup()
@@ -99,84 +108,186 @@ void setup()
         Serial.println("Failed to set up IMU");
 
     // set up SD card
-    if (!SD.begin(SPI_CS_SD))
+    pinMode(SD_CD, INPUT_PULLUP);
+    SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI, SPI_CS_SD);
+    while (!SD.begin(SPI_CS_SD, SPI, 400000))
+    {
         Serial.println("Failed to set up SD card");
+        while (digitalRead(SD_CD))
+        {
+            Serial.println("Waiting for SD card to be inserted...");
+            delay(1000);
+        }
+        delay(1000);
+    }
 
     // set up CAN buses
-    TwaiCAN can0;
     if (!setupCAN(can0, CAN0_SX, CAN0_TX, CAN0_RX))
         Serial.println("Failed to set up CAN bus 0");
+    else
+        Serial.println("CAN initialized successfully");
 
-    TwaiCAN can1;
     if (!setupCAN(can1, CAN1_SX, CAN1_TX, CAN1_RX))
         Serial.println("Failed to set up CAN bus 1");
-
-    // init tasks
-    // xTaskCreatePinnedToCore(vTask_OBD_Request_1Hz, "OBD_Request_1Hz", 4096, NULL, 1, NULL, 0);
-    // xTaskCreatePinnedToCore(vTask_OBD_Request_10Hz, "OBD_Request_10Hz", 4096, NULL, 1, NULL, 0);
+    else
+        Serial.println("CAN initialized successfully");
 }
 
 void loop()
 {
+    // init local vars
+    static File *log_file = NULL;
     static unsigned long long startTime = micros();
     static unsigned long long lastReceptionTime = startTime;
     static unsigned long long lastRequestTime_1Hz = startTime;
     static unsigned long long lastRequestTime_10Hz = startTime;
     static unsigned long long currentTime = startTime;
-    currentTime = micros();
 
-    CanFrame frame;
-    if (can0.readFrame(frame))
+    switch (logging_mode)
     {
-        // log timestamps
-        unsigned long long timestamp = currentTime - startTime;
-        lastReceptionTime = currentTime;
-
-        // OBD response handling
-        if (frame.identifier >= 0x7E8 && frame.identifier <= 0x7EF)
+    case LOGGING_MODE_INACTIVE:
+    {
+        // do nothing
+        bool printed = false;
+        while (digitalRead(BUTS))
         {
-            uint8_t mode = frame.data[1]; // should be 0x41 for response to 01
-            uint8_t pid = frame.data[2];
-            if (mode == 0x41 && pid == OBD_1Hz_ID)
+            // if (!printed)
+            // {
+            //     Serial.println("Press button to start logging");
+            //     printed = true;
+            // }
+        }
+        logging_mode = LOGGING_MODE_START;
+        Serial.println("Logging started");
+        while (!digitalRead(BUTS))
+        {
+            delay(50);
+        }
+        break;
+    }
+
+    case LOGGING_MODE_START:
+    {
+        // new file
+        // get time from GPS
+
+        // filename
+        uint file_int = 0;
+        String filename = "/log_" + String(file_int) + ".csv";
+        while (true)
+        {
+            if (!SD.exists(filename))
             {
-                OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 2)) - 1; // increment and wait at -1
+                break;
             }
-            if (mode == 0x41 && pid == OBD_10Hz_ID)
-            {
-                OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 2)) - 1; // increment and wait at -1
-            }
+            file_int++;
+            filename = "/log_" + String(file_int) + ".csv";
         }
 
-        // print to serial
-        printMessageToSerialRaw(timestamp, frame, 0);
+        // start file
+        log_file = new File(SD.open(filename, FILE_WRITE));
+        Serial.println("Logging to file: " + filename);
 
-        // print to SD card
-        writeCanFrameToSD(frame, timestamp, 0);
+        // start logging
+        writeCANHeaderToSD(*log_file);
+        logging_mode = LOGGING_MODE_ACTIVE;
+
+        // init vars
+        startTime = micros();
+        lastReceptionTime = startTime;
+        lastRequestTime_1Hz = startTime;
+        lastRequestTime_10Hz = startTime;
+        currentTime = startTime;
+
+        // start OBD request tasks
+        // xTaskCreatePinnedToCore(vTask_OBD_Request_1Hz, "OBD_Request_1Hz", 4096, NULL, 1, NULL, 0);
+        // xTaskCreatePinnedToCore(vTask_OBD_Request_10Hz, "OBD_Request_10Hz", 4096, NULL, 1, NULL, 0);
+
+        break;
     }
 
-    if (can1.readFrame(frame))
+    case LOGGING_MODE_ACTIVE:
     {
-        // log timestamps
-        unsigned long long timestamp = currentTime - startTime;
-        lastReceptionTime = currentTime;
-        
-        // print to serial
-        printMessageToSerialRaw(timestamp, frame, 1);
+        currentTime = micros();
 
-        // print to SD card
-        writeCanFrameToSD(frame, timestamp, 1);
+        CanFrame frame;
+        if (can0.readFrame(frame))
+        {
+            // log timestamps
+            unsigned long long timestamp = currentTime - startTime;
+            lastReceptionTime = currentTime;
+
+            // OBD response handling
+            if (frame.identifier >= 0x7E8 && frame.identifier <= 0x7EF)
+            {
+                uint8_t mode = frame.data[1]; // should be 0x41 for response to 01
+                uint8_t pid = frame.data[2];
+                if (mode == 0x41 && pid == OBD_1Hz_ID)
+                {
+                    OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 2)) - 1; // increment and wait at -1
+                }
+                if (mode == 0x41 && pid == OBD_10Hz_ID)
+                {
+                    OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 2)) - 1; // increment and wait at -1
+                }
+            }
+
+            // print to serial
+            printMessageToSerialRaw(timestamp, frame, 0);
+
+            // print to SD card
+            writeCanFrameToSD(frame, timestamp, 0, *log_file);
+        }
+
+        if (can1.readFrame(frame))
+        {
+            // log timestamps
+            unsigned long long timestamp = currentTime - startTime;
+            lastReceptionTime = currentTime;
+
+            // print to serial
+            printMessageToSerialRaw(timestamp, frame, 1);
+
+            // print to SD card
+            writeCanFrameToSD(frame, timestamp, 1, *log_file);
+        }
+
+        // print CAN timeout if no frames received
+        if (currentTime - lastReceptionTime > 2000000)
+        {
+            Serial.println("Waiting for OBD response...");
+            lastReceptionTime = currentTime;
+            toggleLED();
+        }
+
+        if (!digitalRead(BUTS))
+        {
+            logging_mode = LOGGING_MODE_STOP;
+        }
+        break;
     }
 
-    // print CAN timeout if no frames received
-    if (currentTime - lastReceptionTime > 2000000)
+    case LOGGING_MODE_STOP:
     {
-        Serial.println("Waiting for OBD response...");
-        lastReceptionTime = currentTime;
-        toggleLED();
+        // close file
+        Serial.print("Logging stopped: ");
+        Serial.println(log_file->path());
+        log_file->close();
+        log_file = NULL;
+
+        // stop OBD request tasks
+        stopOBDTask_1Hz = true;
+        stopOBDTask_10Hz = true;
+
+        logging_mode = LOGGING_MODE_INACTIVE;
+        while (!digitalRead(BUTS))
+        {
+            delay(50);
+        }
+        break;
+    }
     }
 
-    // handle user input for IO
     // TODO
-
     delay(50);
 }
