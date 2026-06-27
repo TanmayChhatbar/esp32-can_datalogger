@@ -33,4 +33,10 @@
 // IO
 #define ARGB_LED 9
 #define NUM_LED 3
-#define BUTS 22
+#define BUTS 22 // 22 does not support analogRead(), TODO needs PCB change. GPIO0-6 support analogRead() https://documentation.espressif.com/esp32-c6_datasheet_en.html
+
+// voltages if BUTS is analogRead() capable
+// #define BUTS_V1 
+// #define BUTS_V2
+// #define BUTS_V3
+// #define BUTS_V4
