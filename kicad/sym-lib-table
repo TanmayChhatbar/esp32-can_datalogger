@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "motorcycle_lean_angle_sym")(type "KiCad")(uri "${KIPRJMOD}/motorcycle_lean_angle_sym.kicad_sym")(options "")(descr ""))
+)
