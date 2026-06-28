@@ -123,14 +123,15 @@ void setup()
 
     // set up CAN buses
     if (!setupCAN(can0, CAN0_SX, CAN0_TX, CAN0_RX))
-        Serial.println("Failed to set up CAN bus 0");
+        Serial.println("Failed to set up CAN0");
     else
-        Serial.println("CAN initialized successfully");
+        Serial.println("CAN0 initialized successfully");
 
+    // TODO second CAN bus doesnt work, regardless of which is initialized second
     if (!setupCAN(can1, CAN1_SX, CAN1_TX, CAN1_RX))
-        Serial.println("Failed to set up CAN bus 1");
+        Serial.println("Failed to set up CAN1");
     else
-        Serial.println("CAN initialized successfully");
+        Serial.println("CAN1 initialized successfully");
 }
 
 void loop()
@@ -148,21 +149,33 @@ void loop()
     case LOGGING_MODE_INACTIVE:
     {
         // do nothing
-        bool printed = false;
         while (digitalRead(BUTS))
-        {
-            // if (!printed)
-            // {
-            //     Serial.println("Press button to start logging");
-            //     printed = true;
-            // }
-        }
-        logging_mode = LOGGING_MODE_START;
-        Serial.println("Logging started");
-        while (!digitalRead(BUTS))
         {
             delay(50);
         }
+        logging_mode = LOGGING_MODE_START;
+        unsigned long long button_time = millis();
+        while (!digitalRead(BUTS))
+        {
+            if (millis() - button_time > 1000)
+            {
+                logging_mode = LOGGING_MODE_WIFI;
+                Serial.println("Enabling WiFi");
+                break;
+            }
+            delay(50);
+        }
+        if (logging_mode == LOGGING_MODE_START)
+        {
+            Serial.println("Logging started");
+        }
+        break;
+    }
+
+    case LOGGING_MODE_WIFI:
+    {
+        // TODO
+        delay(50);
         break;
     }
 
