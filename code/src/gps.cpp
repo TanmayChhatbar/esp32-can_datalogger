@@ -1,5 +1,4 @@
 #include "gps.h"
-#include <Arduino.h>
 
 bool setupGPS()
 {
