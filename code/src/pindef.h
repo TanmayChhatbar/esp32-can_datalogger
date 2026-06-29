@@ -9,8 +9,8 @@
 #define CAN1_SX CAN0_SX
 
 // GPS
-// #define GPS_TX TODO
-// #define GPS_RX TODO
+#define GPS_TX 16
+#define GPS_RX 17
 #define GPS_FIX 14
 
 // SPI
