@@ -13,3 +13,11 @@ bool writeCANHeaderToSD(File &file)
     file.println(header);
     return true;
 }
+
+const char *getFilenameForCurrentTime() {
+    time_t now = time(nullptr);
+    struct tm *timeinfo = localtime(&now);
+    static char filename[36];
+    strftime(filename, sizeof(filename), "/YamahaR7_%Y-%m-%d_%H-%M-%S.log", timeinfo);
+    return filename;
+}

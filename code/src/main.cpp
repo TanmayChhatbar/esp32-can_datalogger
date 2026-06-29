@@ -101,7 +101,25 @@ void setup()
 
     // set up GPS
     if (!setupGPS())
+    {
         Serial.println("Failed to set up GPS");
+        while (1)
+        {
+            delay(1000);
+        }
+    }
+    Serial.println("GPS initialized successfully");
+
+    // wait for fix
+    if (!waitForGPSFix(60000))
+    {
+        Serial.println("Failed to acquire GPS fix");
+        while (1)
+        {
+            delay(1000);
+        }
+    }
+    syncTimeFromGPS();
 
     // set up IMU
     if (!setupIMU())
@@ -137,7 +155,7 @@ void setup()
 void loop()
 {
     // init local vars
-    static File *log_file = NULL;
+    static File log_file;
     static unsigned long long startTime = micros();
     static unsigned long long lastReceptionTime = startTime;
     static unsigned long long lastRequestTime_1Hz = startTime;
@@ -147,28 +165,38 @@ void loop()
     switch (logging_mode)
     {
     case LOGGING_MODE_INACTIVE:
+    default:
     {
-        // do nothing
-        while (digitalRead(BUTS))
+        if (readGPS())
         {
-            delay(50);
+            Serial.printf("%02d:%02d:%02d UTC | %.6f%c | %.6f%c | %d sats\n",
+                          GPS.hour, GPS.minute, GPS.seconds,
+                          GPS.latitudeDegrees, GPS.lat,
+                          GPS.longitudeDegrees, GPS.lon,
+                          GPS.satellites);
         }
-        logging_mode = LOGGING_MODE_START;
-        unsigned long long button_time = millis();
-        while (!digitalRead(BUTS))
+
+        // check button press
+        if (!digitalRead(BUTS))
         {
-            if (millis() - button_time > 1000)
+            logging_mode = LOGGING_MODE_START;
+            unsigned long long button_time = millis();
+            while (!digitalRead(BUTS))
             {
-                logging_mode = LOGGING_MODE_WIFI;
-                Serial.println("Enabling WiFi");
-                break;
+                if (millis() - button_time > 1000)
+                {
+                    logging_mode = LOGGING_MODE_WIFI;
+                    Serial.println("Enabling WiFi");
+                    break;
+                }
+                delay(50);
             }
-            delay(50);
+            if (logging_mode == LOGGING_MODE_START)
+            {
+                Serial.println("Logging started");
+            }
         }
-        if (logging_mode == LOGGING_MODE_START)
-        {
-            Serial.println("Logging started");
-        }
+
         break;
     }
 
@@ -185,28 +213,17 @@ void loop()
         // get time from GPS
 
         // filename
-        uint file_int = 0;
-        String filename = "/log_" + String(file_int) + ".csv";
-        while (true)
-        {
-            if (!SD.exists(filename))
-            {
-                break;
-            }
-            file_int++;
-            filename = "/log_" + String(file_int) + ".csv";
-        }
-
-        // start file
-        log_file = new File(SD.open(filename, FILE_WRITE));
-        Serial.println("Logging to file: " + filename);
+        const char *filename = getFilenameForCurrentTime();
+        log_file = SD.open(filename, FILE_WRITE);
+        Serial.print("Logging to file: ");
+        Serial.println(filename);
 
         // start logging
-        writeCANHeaderToSD(*log_file);
+        writeCANHeaderToSD(log_file);
         logging_mode = LOGGING_MODE_ACTIVE;
 
         // init vars
-        startTime = micros();
+        startTime = micros() - GPS.milliseconds * 1000; // so that timestamps are relative to the GPS time to the second
         lastReceptionTime = startTime;
         lastRequestTime_1Hz = startTime;
         lastRequestTime_10Hz = startTime;
@@ -249,7 +266,7 @@ void loop()
             printMessageToSerialRaw(timestamp, frame, 0);
 
             // print to SD card
-            writeCanFrameToSD(frame, timestamp, 0, *log_file);
+            writeCanFrameToSD(frame, timestamp, 0, log_file);
         }
 
         if (can1.readFrame(frame))
@@ -262,7 +279,7 @@ void loop()
             printMessageToSerialRaw(timestamp, frame, 1);
 
             // print to SD card
-            writeCanFrameToSD(frame, timestamp, 1, *log_file);
+            writeCanFrameToSD(frame, timestamp, 1, log_file);
         }
 
         // print CAN timeout if no frames received
@@ -284,9 +301,8 @@ void loop()
     {
         // close file
         Serial.print("Logging stopped: ");
-        Serial.println(log_file->path());
-        log_file->close();
-        log_file = NULL;
+        Serial.println(log_file.path());
+        log_file.close();
 
         // stop OBD request tasks
         stopOBDTask_1Hz = true;

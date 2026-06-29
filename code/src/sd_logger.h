@@ -16,3 +16,4 @@ enum logging_mode_t
 
 bool writeCanFrameToSD(const CanFrame &frame, unsigned long long timestamp, const uint8_t bus, File &file);
 bool writeCANHeaderToSD(File &file);
+const char *getFilenameForCurrentTime();
