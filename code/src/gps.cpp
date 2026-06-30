@@ -30,7 +30,6 @@ bool setupGPS()
 
 bool waitForGPSFix(uint32_t timeout_ms)
 {
-    Serial.println("Waiting for GPS fix...");
     uint32_t start = millis();
 
     while (millis() - start < timeout_ms)
@@ -47,20 +46,16 @@ bool waitForGPSFix(uint32_t timeout_ms)
 
         if (GPS.fix)
         {
-            // Serial.printf("Fix acquired in %lus — %d sats, HDOP %.1f\n",
-            //     (millis() - start) / 1000,
-            //     GPS.satellites,
-            //     GPS.HDOP);
             return true;
         }
 
         // print dot
-        static uint32_t lastDot = 0;
-        if (millis() - lastDot > 1000)
-        {
-            Serial.print('.');
-            lastDot = millis();
-        }
+        // static uint32_t lastDot = 0;
+        // if (millis() - lastDot > 1000)
+        // {
+        //     Serial.print('.');
+        //     lastDot = millis();
+        // }
     }
     return false;
 }

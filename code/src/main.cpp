@@ -94,62 +94,77 @@ void vTask_OBD_Request_10Hz(void *parameter)
 
 void setup()
 {
+    while (!Serial.available())
+    {
+        delay(100);
+    }
     Serial.begin(460800);
+    delay(2500);
 
     // set up on-board LEDs
     setupLED();
 
     // set up GPS
+    Serial.println("GPS");
     if (!setupGPS())
     {
-        Serial.println("Failed to set up GPS");
+        Serial.println("\tFailed to initialize");
         while (1)
         {
             delay(1000);
         }
     }
-    Serial.println("GPS initialized successfully");
+    Serial.println("\tInitialized successfully");
 
     // wait for fix
+    Serial.print("\tWaiting for GPS fix...");
     if (!waitForGPSFix(60000))
     {
-        Serial.println("Failed to acquire GPS fix");
+        Serial.println("\tFailed to acquire fix");
         while (1)
         {
             delay(1000);
         }
     }
+    Serial.println("\n\tFix acquired");
     syncTimeFromGPS();
 
     // set up IMU
+    Serial.println("IMU");
     if (!setupIMU())
-        Serial.println("Failed to set up IMU");
+        Serial.println("\tTODO\n\tFailed to initialize");
 
     // set up SD card
     pinMode(SD_CD, INPUT_PULLUP);
     SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI, SPI_CS_SD);
-    while (!SD.begin(SPI_CS_SD, SPI, 400000))
+    Serial.println("SD");
+    while (digitalRead(SD_CD))
     {
-        Serial.println("Failed to set up SD card");
-        while (digitalRead(SD_CD))
-        {
-            Serial.println("Waiting for SD card to be inserted...");
-            delay(1000);
-        }
+        Serial.println("\tWaiting for SD card to be inserted...");
         delay(1000);
     }
+    while (!SD.begin(SPI_CS_SD, SPI, 400000))
+    {
+        Serial.println("\tFailed to initialize");
+        delay(1000);
+    }
+    Serial.println("\tInitialized");
 
     // set up CAN buses
-    if (!setupCAN(can0, 0, CAN0_SX, CAN0_TX, CAN0_RX))
-        Serial.println("Failed to set up CAN0");
+    Serial.println("CAN0");
+    esp_err_t err = setupCAN(can0, 0, CAN0_SX, CAN0_TX, CAN0_RX);
+    if (err != ESP_OK)
+        Serial.printf("\tTWAI%d install failed: %s\n", 0, esp_err_to_name(err));
     else
-        Serial.println("CAN0 initialized successfully");
+        Serial.printf("\tTWAI%d started on TX=%d RX=%d\n", 0, CAN0_TX, CAN0_RX);
 
     // TODO second CAN bus doesnt work, regardless of which is initialized second
-    if (!setupCAN(can1, 1, CAN1_SX, CAN1_TX, CAN1_RX))
-        Serial.println("Failed to set up CAN1");
+    Serial.println("CAN1");
+    err = setupCAN(can1, 1, CAN1_SX, CAN1_TX, CAN1_RX);
+    if (err != ESP_OK)
+        Serial.printf("\tTWAI%d install failed: %s\n", 1, esp_err_to_name(err));
     else
-        Serial.println("CAN1 initialized successfully");
+        Serial.printf("\tTWAI%d started on TX=%d RX=%d\n", 1, CAN1_TX, CAN1_RX);
 }
 
 void loop()
@@ -169,7 +184,7 @@ void loop()
     {
         if (readGPS())
         {
-            Serial.printf("%02d:%02d:%02d UTC | %.6f%c | %.6f%c | %d sats\n",
+            Serial.printf("%02d:%02d:%02d UTC | %.8f%c | %.8f%c | %d sats\n",
                           GPS.hour, GPS.minute, GPS.seconds,
                           GPS.latitudeDegrees, GPS.lat,
                           GPS.longitudeDegrees, GPS.lon,
@@ -263,7 +278,7 @@ void loop()
             }
 
             // print to serial
-            printMessageToSerialRaw(timestamp, frame, 0);
+            Serial.println(CanFrameToString(frame, timestamp, 0));
 
             // print to SD card
             writeCanFrameToSD(frame, timestamp, 0, log_file);
@@ -276,7 +291,7 @@ void loop()
             lastReceptionTime = currentTime;
 
             // print to serial
-            printMessageToSerialRaw(timestamp, frame, 1);
+            Serial.println(CanFrameToString(frame, timestamp, 1));
 
             // print to SD card
             writeCanFrameToSD(frame, timestamp, 1, log_file);
