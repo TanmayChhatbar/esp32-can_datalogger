@@ -8,8 +8,8 @@
 #include "imu.h"
 #include "gps.h"
 
-TwaiCAN can0;
-TwaiCAN can1;
+twai_handle_t can0 = nullptr;
+twai_handle_t can1 = nullptr;
 volatile int OBD_sigCount_1Hz_index = 0;
 volatile int OBD_sigCount_10Hz_index = 0;
 volatile OBD_signal OBD_1Hz_ID = OBD_SIGNALS_OF_INTEREST_1HZ[0];   // current OBD signal for which response is expected, -1 means no signal requested yet for delay between request batches
@@ -140,13 +140,13 @@ void setup()
     }
 
     // set up CAN buses
-    if (!setupCAN(can0, CAN0_SX, CAN0_TX, CAN0_RX))
+    if (!setupCAN(can0, 0, CAN0_SX, CAN0_TX, CAN0_RX))
         Serial.println("Failed to set up CAN0");
     else
         Serial.println("CAN0 initialized successfully");
 
     // TODO second CAN bus doesnt work, regardless of which is initialized second
-    if (!setupCAN(can1, CAN1_SX, CAN1_TX, CAN1_RX))
+    if (!setupCAN(can1, 1, CAN1_SX, CAN1_TX, CAN1_RX))
         Serial.println("Failed to set up CAN1");
     else
         Serial.println("CAN1 initialized successfully");
@@ -241,7 +241,7 @@ void loop()
         currentTime = micros();
 
         CanFrame frame;
-        if (can0.readFrame(frame))
+        if (twai_receive_v2(can0, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
         {
             // log timestamps
             unsigned long long timestamp = currentTime - startTime;
@@ -269,7 +269,7 @@ void loop()
             writeCanFrameToSD(frame, timestamp, 0, log_file);
         }
 
-        if (can1.readFrame(frame))
+        if (twai_receive_v2(can1, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
         {
             // log timestamps
             unsigned long long timestamp = currentTime - startTime;

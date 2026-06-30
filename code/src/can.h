@@ -19,9 +19,9 @@ enum OBD_signal : uint8_t
 const OBD_signal OBD_SIGNALS_OF_INTEREST_1HZ[] = {OBD_FUEL_LEVEL, OBD_RUNNING_TIME, OBD_ODOMETER};
 const OBD_signal OBD_SIGNALS_OF_INTEREST_10HZ[] = {OBD_ENGINE_LOAD, OBD_VEHICLE_SPEED};
 
-bool setupCAN(TwaiCAN &can, uint canSx, uint canTx, uint canRx);
+bool setupCAN(twai_handle_t &can, uint8_t controllerId, uint8_t sxPin, uint8_t txPin, uint8_t rxPin);
 void printMessageToSerialRaw(const unsigned long long timestamp, const CanFrame frame, const uint8_t bus);
-bool requestOBDSignal(TwaiCAN &can, OBD_signal signal);
+bool requestOBDSignal(twai_handle_t &can, OBD_signal signal);
 String CanFrameToString(const CanFrame &frame, const unsigned long long timestamp, const uint8_t bus);
 const uint8_t OBD_SIGCOUNT_1HZ = sizeof(OBD_SIGNALS_OF_INTEREST_1HZ) / sizeof(OBD_signal);
 const uint8_t OBD_SIGCOUNT_10HZ = sizeof(OBD_SIGNALS_OF_INTEREST_10HZ) / sizeof(OBD_signal);
