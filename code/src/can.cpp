@@ -60,6 +60,10 @@ String CanFrameToString(const CanFrame &frame, const unsigned long long timestam
             outString += "0";
         outString += String(frame.data[i], HEX) + ",";
     }
+    for (int i = frame.data_length_code; i < 8; i++)
+    {
+        outString += "00,";
+    }
     return outString;
 }
 

@@ -4,6 +4,7 @@
 #include "pindef.h"
 #include "led.h"
 #include "can.h"
+#include "canmod_gps.h"
 #include "sd_logger.h"
 #include "imu.h"
 #include "gps.h"
@@ -185,11 +186,19 @@ void loop()
     {
         if (readGPS())
         {
-            Serial.printf("%02d:%02d:%02d UTC | %.8f%c | %.8f%c | %d sats\n",
-                          GPS.hour, GPS.minute, GPS.seconds,
+            Serial.printf("%02d:%02d:%02d.%03d UTC | %.8f%c | %.8f%c | %d sats\n",
+                          GPS.hour, GPS.minute, GPS.seconds, GPS.milliseconds,
                           GPS.latitudeDegrees, GPS.lat,
                           GPS.longitudeDegrees, GPS.lon,
                           GPS.satellites);
+            CanFrame gps_frame[4];
+            if (GPSFrameToCanFrame(gps_frame))
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    Serial.println(CanFrameToString(gps_frame[i], micros() - startTime, 2));
+                }
+            }
         }
 
         // check button press
