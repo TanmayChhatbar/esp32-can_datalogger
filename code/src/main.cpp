@@ -312,7 +312,6 @@ void loop()
         {
             Serial.println("Waiting for OBD response...");
             lastReceptionTime = currentTime;
-            toggleLED_test();
         }
 
         if (!digitalRead(BUTS))
