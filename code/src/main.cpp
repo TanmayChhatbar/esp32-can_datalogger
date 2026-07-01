@@ -184,23 +184,7 @@ void loop()
     case LOGGING_MODE_INACTIVE:
     default:
     {
-        if (readGPS())
-        {
-            Serial.printf("%02d:%02d:%02d.%03d UTC | %.8f%c | %.8f%c | %d sats\n",
-                          GPS.hour, GPS.minute, GPS.seconds, GPS.milliseconds,
-                          GPS.latitudeDegrees, GPS.lat,
-                          GPS.longitudeDegrees, GPS.lon,
-                          GPS.satellites);
-            CanFrame gps_frame[4];
-            if (GPSFrameToCanFrame(gps_frame))
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    Serial.println(CanFrameToString(gps_frame[i], micros() - startTime, 2));
-                }
-            }
-        }
-
+        // TODO keep checking sensor state
         // check button press
         if (!digitalRead(BUTS))
         {
@@ -306,6 +290,21 @@ void loop()
             // print to SD card
             writeCanFrameToSD(frame, timestamp, 1, log_file);
         }
+
+        // (virtual CAN) GPS
+        if (readGPS())
+        {
+            CanFrame gps_frame[4];
+            if (GPSFrameToCanFrame(gps_frame))
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    writeCanFrameToSD(gps_frame[i], micros() - startTime, 2, log_file);
+                }
+            }
+        }
+
+        // TODO (virtual CAN) IMU
 
         // print CAN timeout if no frames received
         if (currentTime - lastReceptionTime > 2000000)

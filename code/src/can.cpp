@@ -5,10 +5,10 @@
 #include "esp_err.h"
 
 esp_err_t setupCAN(twai_handle_t &bus,
-              uint8_t controllerId,
-              uint8_t sxPin,
-              uint8_t txPin,
-              uint8_t rxPin)
+                   uint8_t controllerId,
+                   uint8_t sxPin,
+                   uint8_t txPin,
+                   uint8_t rxPin)
 {
     if (sxPin >= 0)
     {
@@ -47,13 +47,11 @@ esp_err_t setupCAN(twai_handle_t &bus,
     return ESP_OK;
 }
 
-String CanFrameToString(const CanFrame &frame, const unsigned long long timestamp, const uint8_t bus)
+String CanFrameToString(const CanFrame &frame, uint64_t timestamp, const uint8_t bus)
 {
-    String outString = String((float)timestamp / 1000000.0f, 3) + "," +
-                       String(frame.identifier, HEX) + "," +
-                       String(frame.extd ? "1" : "0") + "," +
-                       String(frame.rtr ? "1" : "0") + "," +
-                       String(frame.data_length_code) + ",";
+    char buf[70];
+    snprintf(buf, sizeof(buf), "%llu,%08X,%s,%s,%d,%d,", timestamp, frame.identifier, frame.extd ? "true" : "false", frame.rtr ? "Rx" : "Tx", bus, frame.data_length_code);
+    String outString = String(buf);
     for (int i = 0; i < frame.data_length_code; i++)
     {
         if (frame.data[i] < 0x10)
