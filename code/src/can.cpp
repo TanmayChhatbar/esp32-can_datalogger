@@ -50,7 +50,12 @@ esp_err_t setupCAN(twai_handle_t &bus,
 String CanFrameToString(const CanFrame &frame, uint64_t timestamp, const uint8_t bus)
 {
     char buf[70];
-    snprintf(buf, sizeof(buf), "%llu,%08X,%s,%s,%d,%d,", timestamp, frame.identifier, frame.extd ? "true" : "false", frame.rtr ? "Rx" : "Tx", bus, frame.data_length_code);
+    snprintf(buf, sizeof(buf), "%llu,%08X,%s,%s,%d,%d,", timestamp,
+                                                        frame.identifier,
+                                                        frame.extd ? "true" : "false",
+                                                        frame.rtr ? "Tx" : "Rx",
+                                                        bus,
+                                                        frame.data_length_code);
     String outString = String(buf);
     for (int i = 0; i < frame.data_length_code; i++)
     {

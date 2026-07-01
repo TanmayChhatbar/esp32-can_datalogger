@@ -10,7 +10,7 @@ uint64_t getEpochMicroseconds()
 
 bool writeCanFrameToSD(const CanFrame &frame, unsigned long long timestamp, const uint8_t bus, File &file)
 {
-    String can_data_str = CanFrameToString(frame, getEpochMicroseconds(), bus);
+    String can_data_str = CanFrameToString(frame, timestamp, bus);
     file.println(can_data_str);
     return true;
 }

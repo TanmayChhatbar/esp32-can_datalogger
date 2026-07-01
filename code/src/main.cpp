@@ -253,7 +253,20 @@ void loop()
         if (twai_receive_v2(can0, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
         {
             // log timestamps
-            unsigned long long timestamp = currentTime - startTime;
+            unsigned long long timestamp = getEpochMicroseconds();
+            lastReceptionTime = currentTime;
+
+            // print to serial
+            Serial.println(CanFrameToString(frame, timestamp, 0));
+
+            // print to SD card
+            writeCanFrameToSD(frame, timestamp, 0, log_file);
+        }
+
+        if (twai_receive_v2(can1, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
+        {
+            // log timestamps
+            unsigned long long timestamp = getEpochMicroseconds();
             lastReceptionTime = currentTime;
 
             // OBD response handling
@@ -270,20 +283,6 @@ void loop()
                     OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 2)) - 1; // increment and wait at -1
                 }
             }
-
-            // print to serial
-            Serial.println(CanFrameToString(frame, timestamp, 0));
-
-            // print to SD card
-            writeCanFrameToSD(frame, timestamp, 0, log_file);
-        }
-
-        if (twai_receive_v2(can1, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
-        {
-            // log timestamps
-            unsigned long long timestamp = currentTime - startTime;
-            lastReceptionTime = currentTime;
-
             // print to serial
             Serial.println(CanFrameToString(frame, timestamp, 1));
 
@@ -294,12 +293,13 @@ void loop()
         // (virtual CAN) GPS
         if (readGPS())
         {
+            unsigned long long timestamp = getEpochMicroseconds();
             CanFrame gps_frame[4];
             if (GPSFrameToCanFrame(gps_frame))
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    writeCanFrameToSD(gps_frame[i], micros() - startTime, 2, log_file);
+                    writeCanFrameToSD(gps_frame[i], timestamp, 2, log_file);
                 }
             }
         }
