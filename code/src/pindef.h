@@ -31,8 +31,8 @@
 #define I2C_DISP 0x3C // TODO
 
 // IO
-#define ARGB_LED 9
-#define NUM_LED 3
+#define ARGB_LED 8
+#define NUM_LED 1
 #define BUTS 22 // 22 does not support analogRead(), TODO needs PCB change. GPIO0-6 support analogRead() https://documentation.espressif.com/esp32-c6_datasheet_en.html
 
 // voltages if BUTS is analogRead() capable

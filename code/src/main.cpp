@@ -176,6 +176,7 @@ void loop()
     static unsigned long long lastRequestTime_1Hz = startTime;
     static unsigned long long lastRequestTime_10Hz = startTime;
     static unsigned long long currentTime = startTime;
+    static unsigned long ledTime = millis();
 
     switch (logging_mode)
     {
@@ -302,7 +303,7 @@ void loop()
         {
             Serial.println("Waiting for OBD response...");
             lastReceptionTime = currentTime;
-            toggleLED();
+            toggleLED_test();
         }
 
         if (!digitalRead(BUTS))
@@ -330,6 +331,12 @@ void loop()
         }
         break;
     }
+    }
+
+    // handle LED
+    if (handleLED(logging_mode, millis() - ledTime))
+    {
+        ledTime = millis();
     }
 
     // TODO
