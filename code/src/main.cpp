@@ -290,6 +290,16 @@ void loop()
             // print to SD card
             writeCanFrameToSD(frame, timestamp, 1, log_file);
         }
+        if (lastRequestTime_1Hz - currentTime > 100000)
+        {
+            OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 2)) - 1; // increment and wait at -1
+            lastRequestTime_1Hz = currentTime;
+        }
+        if (lastRequestTime_10Hz - currentTime > 100000)
+        {
+            OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 2)) - 1; // increment and wait at -1
+            lastRequestTime_10Hz = currentTime;
+        }
 
         // (virtual CAN) GPS
         if (readGPS())
