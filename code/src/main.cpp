@@ -160,7 +160,6 @@ void setup()
     else
         Serial.printf("\tTWAI%d started on TX=%d RX=%d\n", 0, CAN0_TX, CAN0_RX);
 
-    // TODO second CAN bus doesnt work, regardless of which is initialized second
     Serial.println("CAN1");
     err = setupCAN(can1, 1, CAN1_SX, CAN1_TX, CAN1_RX);
     if (err != ESP_OK)
