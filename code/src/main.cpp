@@ -100,7 +100,6 @@ void setup()
         delay(100);
     }
     Serial.begin(460800);
-    delay(2500);
 
     // set up on-board LEDs
     setupLED();
@@ -239,7 +238,7 @@ void loop()
         currentTime = startTime;
 
         // start OBD request tasks
-        // xTaskCreatePinnedToCore(vTask_OBD_Request_1Hz, "OBD_Request_1Hz", 4096, NULL, 1, NULL, 0);
+        xTaskCreatePinnedToCore(vTask_OBD_Request_1Hz, "OBD_Request_1Hz", 4096, NULL, 1, NULL, 0);
         // xTaskCreatePinnedToCore(vTask_OBD_Request_10Hz, "OBD_Request_10Hz", 4096, NULL, 1, NULL, 0);
 
         break;

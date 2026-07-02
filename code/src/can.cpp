@@ -70,7 +70,7 @@ String CanFrameToString(const CanFrame &frame, uint64_t timestamp, const uint8_t
     return outString;
 }
 
-bool requestOBDSignal(TwaiCAN &can, OBD_signal signal)
+bool requestOBDSignal(twai_handle_t &can, OBD_signal signal)
 {
     CanFrame frame;
     frame.identifier = 0x7DF; // functional request ID for OBD2
@@ -82,5 +82,5 @@ bool requestOBDSignal(TwaiCAN &can, OBD_signal signal)
     {
         frame.data[i] = 0x00; // padding
     }
-    return can.writeFrame(frame, 0);
+    return twai_transmit_v2(can, &frame, pdMS_TO_TICKS(1000)) == ESP_OK;
 }
