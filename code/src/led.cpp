@@ -8,6 +8,8 @@ void setupLED()
     pinMode(ARGB_LED, OUTPUT);
     FastLED.addLeds<WS2812B, ARGB_LED, GRB>(leds, NUM_LED);
     FastLED.setBrightness(8);
+    leds[0] = CRGB::White;
+    FastLED.show();
 }
 
 
