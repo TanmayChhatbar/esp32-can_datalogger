@@ -1,6 +1,8 @@
 #pragma once
 #include <Arduino.h>
-#include <ESP32-TWAI-CAN.hpp>
+#include "driver/twai.h"
+#include "esp_err.h"
+
 
 enum OBD_signal : uint8_t
 {
@@ -21,6 +23,6 @@ const OBD_signal OBD_SIGNALS_OF_INTEREST_10HZ[] = {OBD_ENGINE_LOAD, OBD_VEHICLE_
 
 esp_err_t setupCAN(twai_handle_t &can, uint8_t controllerId, uint8_t sxPin, uint8_t txPin, uint8_t rxPin);
 esp_err_t requestOBDSignal(twai_handle_t &can, OBD_signal signal);
-String CanFrameToString(const CanFrame &frame, const unsigned long long timestamp, const uint8_t bus);
+String CanFrameToString(const twai_message_t &frame, const unsigned long long timestamp, const uint8_t bus);
 const uint8_t OBD_SIGCOUNT_1HZ = sizeof(OBD_SIGNALS_OF_INTEREST_1HZ) / sizeof(OBD_signal);
 const uint8_t OBD_SIGCOUNT_10HZ = sizeof(OBD_SIGNALS_OF_INTEREST_10HZ) / sizeof(OBD_signal);

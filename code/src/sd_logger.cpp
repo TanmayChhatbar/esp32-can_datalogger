@@ -8,7 +8,7 @@ uint64_t getEpochMicroseconds()
     return ((int64_t)tv.tv_sec * 1000000LL) + tv.tv_usec;
 }
 
-bool writeCanFrameToSD(const CanFrame &frame, unsigned long long timestamp, const uint8_t bus, File &file)
+bool writeCanFrameToSD(const twai_message_t &frame, unsigned long long timestamp, const uint8_t bus, File &file)
 {
     String can_data_str = CanFrameToString(frame, timestamp, bus);
     file.println(can_data_str);

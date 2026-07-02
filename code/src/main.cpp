@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <FastLED.h>
-#include <ESP32-TWAI-CAN.hpp>
 #include "pindef.h"
 #include "led.h"
 #include "can.h"
@@ -17,7 +16,7 @@ volatile OBD_signal OBD_1Hz_ID = OBD_SIGNALS_OF_INTEREST_1HZ[0];   // current OB
 volatile OBD_signal OBD_10Hz_ID = OBD_SIGNALS_OF_INTEREST_10HZ[0]; // current OBD signal for which response is expected, -1 means no signal requested yet for delay between request batches
 volatile unsigned long long lastOBDRequestTime_1Hz_us = 0;
 volatile unsigned long long lastOBDRequestTime_10Hz_us = 0;
-logging_mode_t logging_mode = LOGGING_MODE_INACTIVE;
+logging_mode_t logging_mode = LOGGING_MODE_WAITGPS;
 bool stopOBDTask_1Hz = false;
 bool stopOBDTask_10Hz = false;
 
@@ -118,19 +117,6 @@ void setup()
     }
     Serial.println("\tInitialized successfully");
 
-    // wait for fix
-    Serial.print("\tWaiting for GPS fix...");
-    if (!waitForGPSFix(60000))
-    {
-        Serial.println("\tFailed to acquire fix");
-        while (1)
-        {
-            delay(1000);
-        }
-    }
-    Serial.println("\n\tFix acquired");
-    syncTimeFromGPS();
-
     // set up IMU
     Serial.println("IMU");
     if (!setupIMU())
@@ -181,6 +167,19 @@ void loop()
 
     switch (logging_mode)
     {
+    case LOGGING_MODE_WAITGPS:
+    {
+        // wait for fix
+        Serial.println("\tWaiting for GPS fix");
+        while (!waitForGPSFix(5000))
+        {
+            Serial.println("\tStill waiting");
+        }
+        Serial.println("\tFix acquired");
+        syncTimeFromGPS();
+        logging_mode = LOGGING_MODE_INACTIVE;
+        break;
+    }
     case LOGGING_MODE_INACTIVE:
     default:
     {
@@ -249,7 +248,7 @@ void loop()
     {
         currentTime = micros();
 
-        CanFrame frame;
+        twai_message_t frame;
         if (twai_receive_v2(can0, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
         {
             // log timestamps
@@ -304,7 +303,7 @@ void loop()
         if (readGPS())
         {
             unsigned long long timestamp = getEpochMicroseconds();
-            CanFrame gps_frame[4];
+            twai_message_t gps_frame[4];
             if (GPSFrameToCanFrame(gps_frame))
             {
                 for (int i = 0; i < 4; i++)

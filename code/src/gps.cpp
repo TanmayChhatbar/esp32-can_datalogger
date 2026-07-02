@@ -91,7 +91,7 @@ void syncTimeFromGPS()
     settimeofday(&tv, nullptr);
 }
 
-bool GPSFrameToCanFrame(CanFrame frame[4])
+bool GPSFrameToCanFrame(twai_message_t frame[4])
 {
     frame[0].identifier = CANMOD_GPS_GNSS_POSITION_FRAME_ID;
     frame[0].extd = CANMOD_GPS_GNSS_POSITION_IS_EXTENDED;

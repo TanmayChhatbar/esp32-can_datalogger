@@ -1,8 +1,6 @@
 #include "can.h"
 
 #include <Arduino.h>
-#include "driver/twai.h"
-#include "esp_err.h"
 
 esp_err_t setupCAN(twai_handle_t &bus,
                    uint8_t controllerId,
@@ -47,7 +45,7 @@ esp_err_t setupCAN(twai_handle_t &bus,
     return ESP_OK;
 }
 
-String CanFrameToString(const CanFrame &frame, uint64_t timestamp, const uint8_t bus)
+String CanFrameToString(const twai_message_t &frame, uint64_t timestamp, const uint8_t bus)
 {
     char buf[70];
     snprintf(buf, sizeof(buf), "%llu,%08X,%s,%s,%d,%d,", timestamp,
@@ -72,7 +70,7 @@ String CanFrameToString(const CanFrame &frame, uint64_t timestamp, const uint8_t
 
 esp_err_t requestOBDSignal(twai_handle_t &can, OBD_signal signal)
 {
-    CanFrame frame;
+    twai_message_t frame;
     frame.identifier = 0x7DF; // functional request ID for OBD2
     frame.data_length_code = 8;
     frame.data[0] = 0x02;   // number of additional bytes (Service ID + PID)
