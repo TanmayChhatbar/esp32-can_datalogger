@@ -37,13 +37,14 @@ void vTask_OBD_Request_1Hz(void *parameter)
 
         OBD_signal target = OBD_SIGNALS_OF_INTEREST_1HZ[OBD_sigCount_1Hz_index];
         // if target changed OR 50 ms timeout for OBD response, send request for next target
-        if (target != OBD_1Hz_ID || micros() - lastOBDRequestTime_1Hz_us > 50000)
+        if (target != OBD_1Hz_ID || micros() - lastOBDRequestTime_1Hz_us > 500000)
         {
             OBD_1Hz_ID = target;
 
-            if (!requestOBDSignal(can0, OBD_1Hz_ID))
+            esp_err_t err = requestOBDSignal(can1, OBD_1Hz_ID);
+            if (err != ESP_OK)
             {
-                Serial.println("(vTask_OBD_Request_1Hz)\tOBD request failed (1Hz): " + String(OBD_1Hz_ID));
+                Serial.println("(vTask_OBD_Request_1Hz)\tOBD request failed (1Hz): " + String(OBD_1Hz_ID) + "\n\tError: " + String(esp_err_to_name(err)));
             }
             else
             {
@@ -73,13 +74,14 @@ void vTask_OBD_Request_10Hz(void *parameter)
 
         OBD_signal target = OBD_SIGNALS_OF_INTEREST_10HZ[OBD_sigCount_10Hz_index];
         // if target changed OR 50 ms timeout for OBD response, send request for next target
-        if (target != OBD_10Hz_ID || micros() - lastOBDRequestTime_10Hz_us > 50000)
+        if (target != OBD_10Hz_ID || micros() - lastOBDRequestTime_10Hz_us > 500000)
         {
             OBD_10Hz_ID = target;
 
-            if (!requestOBDSignal(can0, OBD_10Hz_ID))
+            esp_err_t err = requestOBDSignal(can1, OBD_10Hz_ID);
+            if (err != ESP_OK)
             {
-                Serial.println("(vTask_OBD_Request_10Hz)\tOBD request failed (10Hz): " + String(OBD_10Hz_ID));
+                Serial.println("(vTask_OBD_Request_10Hz)\tOBD request failed (10Hz): " + String(OBD_10Hz_ID) + "\n\tError: " + String(esp_err_to_name(err)));
             }
             else
             {
