@@ -9,6 +9,9 @@
 #include "gps.h"
 #include "button.hpp"
 
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
 twai_handle_t can0 = nullptr;
 twai_handle_t can1 = nullptr;
 volatile int OBD_sigCount_1Hz_index = 0;
@@ -21,6 +24,9 @@ logging_mode_t logging_mode = LOGGING_MODE_WAITGPS;
 bool stopOBDTask_1Hz = false;
 bool stopOBDTask_10Hz = false;
 Button but1;
+
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 void vTask_OBD_Request_1Hz(void *parameter)
 {
@@ -66,6 +72,9 @@ void vTask_OBD_Request_1Hz(void *parameter)
     vTaskDelete(NULL);
 }
 
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
 void vTask_OBD_Request_10Hz(void *parameter)
 {
     TickType_t lastWake = xTaskGetTickCount();
@@ -109,6 +118,64 @@ void vTask_OBD_Request_10Hz(void *parameter)
     stopOBDTask_10Hz = false;
     vTaskDelete(NULL);
 }
+
+void updateLoggingMode(button_state_t user_input)
+{
+    if (user_input == BUTTON_SHORT_PRESS_CONFIRMED)
+    {
+        switch (logging_mode)
+        {
+        case LOGGING_MODE_INACTIVE:
+        {
+            logging_mode = LOGGING_MODE_START;
+            break;
+        }
+
+        case LOGGING_MODE_ACTIVE:
+        {
+            logging_mode = LOGGING_MODE_STOP;
+            break;
+        }
+        case LOGGING_MODE_WAITGPS:
+        case LOGGING_MODE_STOP:
+        case LOGGING_MODE_START:
+        case LOGGING_MODE_WIFI_ACTIVE:
+        case LOGGING_MODE_WIFI_STOP:
+        default:
+        {
+            break;
+        }
+        }
+    }
+    else if (user_input == BUTTON_LONG_PRESS_CONFIRMED)
+    {
+        switch (logging_mode)
+        {
+        case LOGGING_MODE_WAITGPS:
+        case LOGGING_MODE_INACTIVE:
+        {
+            logging_mode = LOGGING_MODE_WIFI_START;
+            break;
+        }
+        case LOGGING_MODE_WIFI_ACTIVE:
+        {
+            logging_mode = LOGGING_MODE_WIFI_STOP;
+            break;
+        }
+        case LOGGING_MODE_WIFI_STOP:
+        case LOGGING_MODE_START:
+        case LOGGING_MODE_ACTIVE:
+        case LOGGING_MODE_STOP:
+        default:
+        {
+            break;
+        }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 void setup()
 {
@@ -173,6 +240,9 @@ void setup()
     else
         Serial.println("\tInitialized");
 }
+
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 void loop()
 {
@@ -358,59 +428,7 @@ void loop()
 
     // handle user input
     button_state_t user_input = but1.readButtonState();
-
-    // handle button press
-    if (user_input == BUTTON_SHORT_PRESS_CONFIRMED)
-    {
-        switch (logging_mode)
-        {
-        case LOGGING_MODE_INACTIVE:
-        {
-            logging_mode = LOGGING_MODE_START;
-            break;
-        }
-
-        case LOGGING_MODE_ACTIVE:
-        {
-            logging_mode = LOGGING_MODE_STOP;
-            break;
-        }
-        case LOGGING_MODE_WAITGPS:
-        case LOGGING_MODE_STOP:
-        case LOGGING_MODE_START:
-        case LOGGING_MODE_WIFI_ACTIVE:
-        case LOGGING_MODE_WIFI_STOP:
-        default:
-        {
-            break;
-        }
-        }
-    }
-    else if (user_input == BUTTON_LONG_PRESS_CONFIRMED)
-    {
-        switch (logging_mode)
-        {
-        case LOGGING_MODE_WAITGPS:
-        case LOGGING_MODE_INACTIVE:
-        {
-            logging_mode = LOGGING_MODE_WIFI_START;
-            break;
-        }
-        case LOGGING_MODE_WIFI_ACTIVE:
-        {
-            logging_mode = LOGGING_MODE_WIFI_STOP;
-            break;
-        }
-        case LOGGING_MODE_WIFI_STOP:
-        case LOGGING_MODE_START:
-        case LOGGING_MODE_ACTIVE:
-        case LOGGING_MODE_STOP:
-        default:
-        {
-            break;
-        }
-        }
-    }
+    updateLoggingMode(user_input);
 
     // limit cycle freq for now, TODO remove later
     delay(50);
