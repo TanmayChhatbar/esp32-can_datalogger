@@ -48,10 +48,6 @@ button_state_t Button::readButtonState()
         {
             _state = BUTTON_SHORT_PRESS_CONFIRMED;
         }
-        else if (_state == BUTTON_LONG_PRESS_CONFIRMED)
-        {
-            _state = BUTTON_NOT_PRESSED;
-        }
         else
         {
             _state = BUTTON_NOT_PRESSED;
