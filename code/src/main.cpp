@@ -52,7 +52,7 @@ void vTask_OBD_Request_1Hz(void *parameter)
                 lastOBDRequestTime_1Hz_us = micros();
                 Serial.println("(vTask_OBD_Request_1Hz)\tRequested OBD signal (1Hz): " + String(OBD_1Hz_ID, HEX));
             }
-            
+
             // TODO handle queue-related timeout errors
         }
     }
@@ -172,6 +172,7 @@ void loop()
     static unsigned long long currentTime_us = startTime_us;
     static unsigned long ledTime_ms = millis();
 
+    // logging actions
     switch (logging_mode)
     {
     case LOGGING_MODE_WAITGPS:
@@ -194,25 +195,30 @@ void loop()
         break;
     }
 
-    case LOGGING_MODE_WIFI:
+    case LOGGING_MODE_WIFI_START:
+    {
+        // TODO
+        logging_mode = LOGGING_MODE_WIFI_ACTIVE;
+        break;
+    }
+    case LOGGING_MODE_WIFI_ACTIVE:
     {
         // TODO
         break;
     }
-    case LOGGING_MODE_STOP_WIFI:
+    case LOGGING_MODE_WIFI_STOP:
     {
         // TODO
+        logging_mode = LOGGING_MODE_INACTIVE;
         break;
     }
 
     case LOGGING_MODE_START:
     {
-        // new file
-        // get time from GPS
-
         // filename
+        unsigned long long starttimertest = micros();
         const char *filename = getFilenameForCurrentTime();
-        log_file = SD.open(filename, FILE_WRITE);
+        log_file = SD.open(filename, FILE_WRITE); // TODO takes more than 0.7 seconds
         Serial.print("Logging to file: ");
         Serial.println(filename);
 
@@ -337,6 +343,7 @@ void loop()
     // handle user input
     button_state_t user_input = but1.readButtonState();
 
+    // handle button press
     if (user_input == BUTTON_SHORT_PRESS_CONFIRMED)
     {
         switch (logging_mode)
@@ -344,21 +351,6 @@ void loop()
         case LOGGING_MODE_INACTIVE:
         {
             logging_mode = LOGGING_MODE_START;
-            unsigned long long button_time = millis();
-            while (!digitalRead(BUT1))
-            {
-                if (millis() - button_time > 1000)
-                {
-                    logging_mode = LOGGING_MODE_WIFI;
-                    Serial.println("Enabling WiFi");
-                    break;
-                }
-                delay(50);
-            }
-            if (logging_mode == LOGGING_MODE_START)
-            {
-                Serial.println("Logging started");
-            }
             break;
         }
 
@@ -370,8 +362,8 @@ void loop()
         case LOGGING_MODE_WAITGPS:
         case LOGGING_MODE_STOP:
         case LOGGING_MODE_START:
-        case LOGGING_MODE_WIFI:
-        case LOGGING_MODE_STOP_WIFI:
+        case LOGGING_MODE_WIFI_ACTIVE:
+        case LOGGING_MODE_WIFI_STOP:
         default:
         {
             break;
@@ -385,14 +377,15 @@ void loop()
         case LOGGING_MODE_WAITGPS:
         case LOGGING_MODE_INACTIVE:
         {
-            logging_mode = LOGGING_MODE_WIFI;
+            logging_mode = LOGGING_MODE_WIFI_START;
             break;
         }
-        case LOGGING_MODE_WIFI:
+        case LOGGING_MODE_WIFI_ACTIVE:
         {
-            logging_mode = LOGGING_MODE_STOP_WIFI;
+            logging_mode = LOGGING_MODE_WIFI_STOP;
             break;
         }
+        case LOGGING_MODE_WIFI_STOP:
         case LOGGING_MODE_START:
         case LOGGING_MODE_ACTIVE:
         case LOGGING_MODE_STOP:
@@ -401,5 +394,7 @@ void loop()
         }
         }
     }
+
+    // limit cycle freq for now, TODO remove later
     delay(50);
 }

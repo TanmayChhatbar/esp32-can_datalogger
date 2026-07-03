@@ -37,3 +37,28 @@ const char *getFilenameForCurrentTime()
     strftime(filename, sizeof(filename), "/YamahaR7_%Y-%m-%d_%H-%M-%S.log", timeinfo);
     return filename;
 }
+
+String loggingModeToString(logging_mode_t logging_mode)
+{
+    switch (logging_mode)
+    {
+    case LOGGING_MODE_WAITGPS:
+        return "LOGGING_MODE_WAITGPS";
+    case LOGGING_MODE_INACTIVE:
+        return "LOGGING_MODE_INACTIVE";
+    case LOGGING_MODE_STOP:
+        return "LOGGING_MODE_STOP";
+    case LOGGING_MODE_START:
+        return "LOGGING_MODE_START";
+    case LOGGING_MODE_ACTIVE:
+        return "LOGGING_MODE_ACTIVE";
+    case LOGGING_MODE_WIFI_START:
+        return "LOGGING_MODE_WIFI_START";
+    case LOGGING_MODE_WIFI_ACTIVE:
+        return "LOGGING_MODE_WIFI_ACTIVE";
+    case LOGGING_MODE_WIFI_STOP:
+        return "LOGGING_MODE_WIFI_STOP";
+    default:
+        return "LOGGING_MODE_UNKNOWN";
+    }
+}
