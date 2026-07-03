@@ -10,8 +10,15 @@ uint64_t getEpochMicroseconds()
 
 bool writeCanFrameToSD(const twai_message_t &frame, unsigned long long timestamp, const uint8_t bus, File &file)
 {
+    // convert to string
     String can_data_str = CanFrameToString(frame, timestamp, bus);
+
+    // write to file
     file.println(can_data_str);
+
+    // print to serial for printing
+    // Serial.println(can_data_str);
+    
     return true;
 }
 

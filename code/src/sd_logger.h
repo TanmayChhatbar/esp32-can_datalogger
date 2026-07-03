@@ -11,7 +11,8 @@ enum logging_mode_t
     LOGGING_MODE_STOP = 1,
     LOGGING_MODE_START = 2,
     LOGGING_MODE_ACTIVE = 3,
-    LOGGING_MODE_WIFI = 4
+    LOGGING_MODE_WIFI = 4,
+    LOGGING_MODE_STOP_WIFI = 5
 };
 
 bool writeCanFrameToSD(const twai_message_t &frame, unsigned long long timestamp, const uint8_t bus, File &file);
