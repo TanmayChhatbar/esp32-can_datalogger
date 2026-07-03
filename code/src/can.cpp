@@ -20,7 +20,7 @@ esp_err_t setupCAN(twai_handle_t &bus,
                                     TWAI_MODE_NORMAL);
 
     g_config.controller_id = controllerId;
-    g_config.tx_queue_len = 10;
+    g_config.tx_queue_len = OBD_TX_LEN;
     g_config.rx_queue_len = 20;
     g_config.alerts_enabled = TWAI_ALERT_NONE;
 
