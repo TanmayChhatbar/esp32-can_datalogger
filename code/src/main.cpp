@@ -189,7 +189,6 @@ void loop()
         break;
     }
     case LOGGING_MODE_INACTIVE:
-    default:
     {
         // TODO keep checking sensor state
         break;
@@ -332,6 +331,10 @@ void loop()
         logging_mode = LOGGING_MODE_INACTIVE;
         break;
     }
+    default:
+    {
+        break;
+    }
     }
 
     // handle LED
@@ -389,6 +392,7 @@ void loop()
         case LOGGING_MODE_START:
         case LOGGING_MODE_ACTIVE:
         case LOGGING_MODE_STOP:
+        default:
         {
             break;
         }
