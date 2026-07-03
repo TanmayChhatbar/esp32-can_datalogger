@@ -33,13 +33,13 @@ button_state_t Button::readButtonState()
         {
             _state = BUTTON_LONG_PRESS_CONTINUED;
         }
+        else if (current_timer_ms - _button_timer_ms > _long_press_timer_ms) // long press timer exceeded
+        {
+            _state = BUTTON_LONG_PRESS_CONFIRMED;
+        }
         else
         {
             _state = BUTTON_PRESSED;
-            if (current_timer_ms - _button_timer_ms > _long_press_timer_ms) // long press timer exceeded
-            {
-                _state = BUTTON_LONG_PRESS_CONFIRMED;
-            }
         }
     }
     else // button not currently pressed
