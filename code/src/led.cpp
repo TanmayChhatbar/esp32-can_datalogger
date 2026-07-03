@@ -21,29 +21,33 @@ bool handleLED(logging_mode_t logging_mode, unsigned long time_since_last_change
     {
         case LOGGING_MODE_WAITGPS:
             new_color = CRGB::Magenta;
-            toggle_time = 1e8;
+            toggle_time = 1000;
             break;
         case LOGGING_MODE_INACTIVE:
-            new_color = CRGB::Yellow;
-            toggle_time = 500;
+            new_color = CRGB::Green;
+            toggle_time = 1e8;
             break;
         case LOGGING_MODE_STOP:
-            new_color = CRGB::Yellow;
-            toggle_time = 1e8;
+            new_color = CRGB::Red;
+            toggle_time = 150;
             break;
         case LOGGING_MODE_START:
             new_color = CRGB::Red;
-            toggle_time = 1e8;
+            toggle_time = 150;
             break;
         case LOGGING_MODE_ACTIVE:
             new_color = CRGB::Red;
             toggle_time = 500;
             break;
-        case LOGGING_MODE_WIFI:
+        case LOGGING_MODE_WIFI_START:
+            new_color = CRGB::Blue;
+            toggle_time = 200;
+            break;
+        case LOGGING_MODE_WIFI_ACTIVE:
             new_color = CRGB::Blue;
             toggle_time = 500;
             break;
-        case LOGGING_MODE_STOP_WIFI:
+        case LOGGING_MODE_WIFI_STOP:
             new_color = CRGB::Blue;
             toggle_time = 200;
             break;
