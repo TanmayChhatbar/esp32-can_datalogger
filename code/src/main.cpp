@@ -35,8 +35,8 @@ void vTask_OBD_Request_1Hz(void *parameter)
     while (!stopOBDTask_1Hz)
     {
         // handle queue-related timeout errors
-        twai_status_info_t *status_info;
-        twai_get_status_info_v2(can1, status_info);
+        twai_status_info_t status_info;
+        twai_get_status_info_v2(can1, &status_info);
 
         // if starting fresh, wait 1Hz equivalent time
         if (OBD_sigCount_1Hz_index == -1)
@@ -46,7 +46,7 @@ void vTask_OBD_Request_1Hz(void *parameter)
             continue;
         }
 
-        if (status_info->msgs_to_tx > OBD_TX_LEN - 1)
+        if (status_info.msgs_to_tx > OBD_TX_LEN - 1)
         {
             OBD_signal target = OBD_SIGNALS_OF_INTEREST_1HZ[OBD_sigCount_1Hz_index];
             // if target changed OR 50 ms timeout for OBD response, send request for next target
@@ -55,14 +55,14 @@ void vTask_OBD_Request_1Hz(void *parameter)
                 OBD_1Hz_ID = target;
 
                 esp_err_t err = requestOBDSignal(can1, OBD_1Hz_ID);
-                if (err != ESP_OK)
-                {
-                    Serial.println("(vTask_OBD_Request_1Hz)\tOBD request failed (1Hz): " + String(OBD_1Hz_ID) + "\n\tError: " + String(esp_err_to_name(err)));
-                }
-                else
+                if (err == ESP_OK)
                 {
                     lastOBDRequestTime_1Hz_us = micros();
                     Serial.println("(vTask_OBD_Request_1Hz)\tRequested OBD signal (1Hz): " + String(OBD_1Hz_ID, HEX));
+                }
+                else
+                {
+                    Serial.println("(vTask_OBD_Request_1Hz)\tOBD request failed (1Hz): " + String(OBD_1Hz_ID) + "\n\tError: " + String(esp_err_to_name(err)));
                 }
             }
         }
@@ -82,8 +82,8 @@ void vTask_OBD_Request_10Hz(void *parameter)
     while (!stopOBDTask_10Hz)
     {
         // handle queue-related timeout errors
-        twai_status_info_t *status_info;
-        twai_get_status_info_v2(can1, status_info);
+        twai_status_info_t status_info;
+        twai_get_status_info_v2(can1, &status_info);
 
         // if starting fresh, wait 1Hz equivalent time
         if (OBD_sigCount_10Hz_index == -1)
@@ -93,7 +93,7 @@ void vTask_OBD_Request_10Hz(void *parameter)
             continue;
         }
 
-        if (status_info->msgs_to_tx > OBD_TX_LEN - 1)
+        if (status_info.msgs_to_tx > OBD_TX_LEN - 1)
         {
             OBD_signal target = OBD_SIGNALS_OF_INTEREST_10HZ[OBD_sigCount_10Hz_index];
             // if target changed OR 50 ms timeout for OBD response, send request for next target
@@ -102,14 +102,14 @@ void vTask_OBD_Request_10Hz(void *parameter)
                 OBD_10Hz_ID = target;
 
                 esp_err_t err = requestOBDSignal(can1, OBD_10Hz_ID);
-                if (err != ESP_OK)
-                {
-                    Serial.println("(vTask_OBD_Request_10Hz)\tOBD request failed (10Hz): " + String(OBD_10Hz_ID) + "\n\tError: " + String(esp_err_to_name(err)));
-                }
-                else
+                if (err == ESP_OK)
                 {
                     lastOBDRequestTime_10Hz_us = micros();
                     Serial.println("(vTask_OBD_Request_10Hz)\tRequested OBD signal (10Hz): " + String(OBD_10Hz_ID, HEX));
+                }
+                else
+                {
+                    Serial.println("(vTask_OBD_Request_10Hz)\tOBD request failed (10Hz): " + String(OBD_10Hz_ID) + "\n\tError: " + String(esp_err_to_name(err)));
                 }
             }
         }
@@ -152,6 +152,11 @@ void updateLoggingMode(button_state_t user_input)
         switch (logging_mode)
         {
         case LOGGING_MODE_WAITGPS:
+        {
+            Serial.println("Overriding GPS wait");
+            logging_mode = LOGGING_MODE_INACTIVE;
+            break;
+        }
         case LOGGING_MODE_INACTIVE:
         {
             logging_mode = LOGGING_MODE_WIFI_START;
@@ -254,6 +259,8 @@ void loop()
     static unsigned long long lastRequestTime_10Hz_us = startTime_us;
     static unsigned long long currentTime_us = startTime_us;
     static unsigned long ledTime_ms = millis();
+    static bool wait_gps_print = false;
+    static unsigned long wait_gps_start_ms = millis();
 
     // logging actions
     switch (logging_mode)
@@ -261,14 +268,33 @@ void loop()
     case LOGGING_MODE_WAITGPS:
     {
         // wait for fix
-        Serial.println("\tWaiting for GPS fix");
-        while (!waitForGPSFix(5000))
+        if (!wait_gps_print)
         {
-            Serial.println("\tStill waiting");
+            Serial.println("\tWaiting for GPS fix");
+            wait_gps_print = true;
+            wait_gps_start_ms = millis();
         }
-        Serial.println("\tFix acquired");
-        syncTimeFromGPS();
-        logging_mode = LOGGING_MODE_INACTIVE;
+        if (millis() - wait_gps_start_ms > 10000)
+        {
+            Serial.print('.');
+            wait_gps_start_ms = millis();
+        }
+
+        while (GPS.available())
+        {
+            GPS.read();
+        }
+        if (GPS.newNMEAreceived())
+        {
+            GPS.parse(GPS.lastNMEA());
+        }
+
+        if (GPS.fix)
+        {
+            Serial.println("\tFix acquired");
+            logging_mode = LOGGING_MODE_INACTIVE;
+            syncTimeFromGPS();
+        }
         break;
     }
     case LOGGING_MODE_INACTIVE:
@@ -429,7 +455,4 @@ void loop()
     // handle user input
     button_state_t user_input = but1.readButtonState();
     updateLoggingMode(user_input);
-
-    // limit cycle freq for now, TODO remove later
-    delay(50);
 }

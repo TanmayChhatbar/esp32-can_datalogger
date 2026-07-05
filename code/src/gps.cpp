@@ -28,38 +28,6 @@ bool setupGPS()
     return true;
 }
 
-bool waitForGPSFix(uint32_t timeout_ms)
-{
-    uint32_t start = millis();
-
-    while (millis() - start < timeout_ms)
-    {
-        while (GPS.available())
-        {
-            GPS.read();
-        }
-
-        if (GPS.newNMEAreceived())
-        {
-            GPS.parse(GPS.lastNMEA());
-        }
-
-        if (GPS.fix)
-        {
-            return true;
-        }
-
-        // print dot
-        // static uint32_t lastDot = 0;
-        // if (millis() - lastDot > 1000)
-        // {
-        //     Serial.print('.');
-        //     lastDot = millis();
-        // }
-    }
-    return false;
-}
-
 bool readGPS()
 {
     while (GPS.available())

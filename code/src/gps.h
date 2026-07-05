@@ -10,7 +10,6 @@
 extern Adafruit_GPS GPS;
 
 bool setupGPS();
-bool waitForGPSFix(uint32_t timeout_ms = 60000);
 bool readGPS();
 void syncTimeFromGPS();
 bool GPSFrameToCanFrame(twai_message_t frame[4]);
