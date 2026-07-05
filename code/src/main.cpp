@@ -261,6 +261,8 @@ void loop()
     static unsigned long ledTime_ms = millis();
     static bool wait_gps_print = false;
     static unsigned long wait_gps_start_ms = millis();
+    static unsigned long counter = 0;
+    static unsigned long lastCycleTime_us = micros();
 
     // logging actions
     switch (logging_mode)
@@ -455,4 +457,13 @@ void loop()
     // handle user input
     button_state_t user_input = but1.readButtonState();
     updateLoggingMode(user_input);
+
+    // measure cycle freq
+    counter++;
+    if (micros() - lastCycleTime_us > 1000000)
+    {
+        Serial.println("Loop freq: " + String(counter) + " Hz");
+        counter = 0;
+        lastCycleTime_us = micros();
+    }
 }
