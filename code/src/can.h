@@ -26,5 +26,6 @@ const OBD_signal OBD_SIGNALS_OF_INTEREST_10HZ[] = {OBD_ENGINE_LOAD, OBD_VEHICLE_
 esp_err_t setupCAN(twai_handle_t &can, uint8_t controllerId, uint8_t sxPin, uint8_t txPin, uint8_t rxPin);
 esp_err_t requestOBDSignal(twai_handle_t &can, OBD_signal signal);
 String CanFrameToString(const twai_message_t &frame, const unsigned long long timestamp, const uint8_t bus);
+size_t CanFrameToCharArray(char *out, size_t out_size, const twai_message_t &frame, uint64_t timestamp, const uint8_t bus);
 const uint8_t OBD_SIGCOUNT_1HZ = sizeof(OBD_SIGNALS_OF_INTEREST_1HZ) / sizeof(OBD_signal);
 const uint8_t OBD_SIGCOUNT_10HZ = sizeof(OBD_SIGNALS_OF_INTEREST_10HZ) / sizeof(OBD_signal);

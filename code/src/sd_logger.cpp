@@ -11,6 +11,8 @@ uint64_t getEpochMicroseconds()
 bool writeCanFrameToSD(const twai_message_t &frame, unsigned long long timestamp, const uint8_t bus, File &file)
 {
     // convert to string
+    // char can_data_str[64];
+    // int n = CanFrameToCharArray(can_data_str, sizeof(can_data_str), frame, timestamp, bus);
     String can_data_str = CanFrameToString(frame, timestamp, bus);
 
     // write to file

@@ -48,6 +48,7 @@ esp_err_t setupCAN(twai_handle_t &bus,
 String CanFrameToString(const twai_message_t &frame, uint64_t timestamp, const uint8_t bus)
 {
     char buf[70];
+    // 1781820252108000,00000240,false,Rx,0,1,00,00,00,00,00,00,00,00,
     snprintf(buf, sizeof(buf), "%llu,%08X,%s,%s,%d,%d,", timestamp,
                                                         frame.identifier,
                                                         frame.extd ? "true" : "false",
@@ -66,6 +67,31 @@ String CanFrameToString(const twai_message_t &frame, uint64_t timestamp, const u
         outString += "00,";
     }
     return outString;
+}
+
+size_t CanFrameToCharArray(char *out, size_t out_size, const twai_message_t &frame, uint64_t timestamp, const uint8_t bus)
+{
+    // 1781820252108000,00000240,false,Rx,0,1,00,00,00,00,00,00,00,00,
+    int n = snprintf(out, out_size, "%llu,%08X,%s,%s,%d,%d,", timestamp,
+                     frame.identifier,
+                     frame.extd ? "true" : "false",
+                     frame.rtr ? "Tx" : "Rx",
+                     bus,
+                     frame.data_length_code);
+
+    char *p = out + n;
+    
+    static const char hex[] = "0123456789ABCDEF";
+    for (int i = 0; i < 8; i++)
+    {
+        uint8_t b = (i < frame.data_length_code) ? frame.data[i] : 0;
+
+        *p++ = hex[b >> 4];
+        *p++ = hex[b & 0x0F];
+        *p++ = ',';
+    }
+    *p = '\0';
+    return p - out;
 }
 
 esp_err_t requestOBDSignal(twai_handle_t &can, OBD_signal signal)
