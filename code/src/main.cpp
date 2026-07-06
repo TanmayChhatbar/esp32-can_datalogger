@@ -35,8 +35,8 @@ void vTask_OBD_Request_1Hz(void *parameter)
     while (!stopOBDTask_1Hz)
     {
         // handle queue-related timeout errors
-        twai_status_info_t status_info;
-        twai_get_status_info_v2(bus1, &status_info);
+        twai_node_status_t status_info;
+        twai_node_get_info(bus1, &status_info, NULL);
 
         // if starting fresh, wait 1Hz equivalent time
         if (OBD_sigCount_1Hz_index == -1)
@@ -46,7 +46,7 @@ void vTask_OBD_Request_1Hz(void *parameter)
             continue;
         }
 
-        if (status_info.msgs_to_tx > OBD_TX_LEN - 1)
+        if (status_info.tx_queue_remaining > OBD_TX_LEN - 1)
         {
             OBD_signal target = OBD_SIGNALS_OF_INTEREST_1HZ[OBD_sigCount_1Hz_index];
             // if target changed OR 50 ms timeout for OBD response, send request for next target
@@ -82,8 +82,8 @@ void vTask_OBD_Request_10Hz(void *parameter)
     while (!stopOBDTask_10Hz)
     {
         // handle queue-related timeout errors
-        twai_status_info_t status_info;
-        twai_get_status_info_v2(bus1, &status_info);
+        twai_node_status_t status_info;
+        twai_node_get_info(bus1, &status_info, NULL);
 
         // if starting fresh, wait 1Hz equivalent time
         if (OBD_sigCount_10Hz_index == -1)
@@ -93,7 +93,7 @@ void vTask_OBD_Request_10Hz(void *parameter)
             continue;
         }
 
-        if (status_info.msgs_to_tx > OBD_TX_LEN - 1)
+        if (status_info.tx_queue_remaining > OBD_TX_LEN - 1)
         {
             OBD_signal target = OBD_SIGNALS_OF_INTEREST_10HZ[OBD_sigCount_10Hz_index];
             // if target changed OR 50 ms timeout for OBD response, send request for next target
@@ -347,7 +347,7 @@ void loop()
     {
         currentTime_us = micros();
 
-        twai_message_t frame;
+        twai_frame_t frame;
         if (twai_receive_v2(bus0, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
         {
             // log timestamps

@@ -4,6 +4,7 @@
 #include "esp_twai_onchip.h"
 #include "esp_twai_types.h"
 #include "esp_err.h"
+#include "sd_logger.h"
 // https://docs.espressif.com/projects/esp-idf/en/v6.0.2/esp32c6/api-reference/peripherals/twai.html
 
 enum OBD_signal : uint8_t
@@ -20,6 +21,13 @@ enum OBD_signal : uint8_t
     OBD_ODOMETER = 0xA6
 };
 
+struct log_frame_t
+{
+    twai_frame_t frame;
+    unsigned long long timestamp;
+    uint8_t bus_id;
+};
+
 #define OBD_TX_LEN 10
 
 const OBD_signal OBD_SIGNALS_OF_INTEREST_1HZ[] = {OBD_FUEL_LEVEL, OBD_RUNNING_TIME, OBD_ODOMETER};
@@ -31,3 +39,4 @@ String CanFrameToString(const twai_message_t &frame, const unsigned long long ti
 size_t CanFrameToCharArray(char *out, size_t out_size, const twai_message_t &frame, uint64_t timestamp, const uint8_t bus_id);
 const uint8_t OBD_SIGCOUNT_1HZ = sizeof(OBD_SIGNALS_OF_INTEREST_1HZ) / sizeof(OBD_signal);
 const uint8_t OBD_SIGCOUNT_10HZ = sizeof(OBD_SIGNALS_OF_INTEREST_10HZ) / sizeof(OBD_signal);
+xQueueHandle canRxQueue;

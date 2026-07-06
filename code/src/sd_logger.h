@@ -21,3 +21,4 @@ bool writeCANHeaderToSD(File &file);
 const char *getFilenameForCurrentTime();
 uint64_t getEpochMicroseconds();
 String loggingModeToString(logging_mode_t logging_mode);
+uint64_t getEpochMicroseconds();

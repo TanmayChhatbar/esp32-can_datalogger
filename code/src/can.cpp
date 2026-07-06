@@ -1,17 +1,22 @@
 #include "can.h"
 
-#include <Arduino.h>
-
 static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_t *edata, void *user_ctx)
 {
-    uint8_t recv_buff[8];
+    uint8_t data[8];
     twai_frame_t rx_frame = {
-        .buffer = recv_buff,
-        .buffer_len = sizeof(recv_buff),
+        .buffer = data,
+        .buffer_len = sizeof(data),
     };
-    if (ESP_OK == twai_node_receive_from_isr(handle, &rx_frame))
+    if (twai_node_receive_from_isr(handle, &rx_frame) == ESP_OK)
     {
-        // TODO receive ok, push to write queue
+        uint8_t bus_id = (uint8_t)(uintptr_t)user_ctx;
+        log_frame_t log_frame = {
+            .frame = rx_frame,
+            .timestamp = getEpochMicroseconds(),
+            .bus_id = bus_id};
+
+        // receive ok, push to write queue
+        xQueueSend(canRxQueue, &log_frame, 0);
     }
     return false;
 }
@@ -44,7 +49,8 @@ esp_err_t setupCAN(twai_node_handle_t bus,
     twai_event_callbacks_t user_cbs = {
         .on_rx_done = twai_rx_cb,
     };
-    twai_node_register_event_callbacks(bus, &user_cbs, NULL);
+
+    twai_node_register_event_callbacks(bus, &user_cbs, (void *)(uintptr_t)controllerId);
 
     esp_err_t err = twai_new_node_onchip(&cfg, &bus);
     if (err != ESP_OK)
