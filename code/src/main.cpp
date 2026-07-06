@@ -119,6 +119,9 @@ void vTask_OBD_Request_10Hz(void *parameter)
     vTaskDelete(NULL);
 }
 
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
 void updateLoggingMode(button_state_t user_input)
 {
     if (user_input == BUTTON_SHORT_PRESS_CONFIRMED)
@@ -254,7 +257,6 @@ void loop()
     // init local vars
     static File log_file;
     static unsigned long long startTime_us = micros();
-    static unsigned long long lastReceptionTime_us = startTime_us;
     static unsigned long long lastRequestTime_1Hz_us = startTime_us;
     static unsigned long long lastRequestTime_10Hz_us = startTime_us;
     static unsigned long long currentTime_us = startTime_us;
@@ -338,7 +340,6 @@ void loop()
 
         // init vars
         startTime_us = micros() - GPS.milliseconds * 1000; // so that timestamps are relative to the GPS time to the second
-        lastReceptionTime_us = startTime_us;
         lastRequestTime_1Hz_us = startTime_us;
         lastRequestTime_10Hz_us = startTime_us;
         currentTime_us = startTime_us;
@@ -359,7 +360,6 @@ void loop()
         {
             // log timestamps
             unsigned long long timestamp = getEpochMicroseconds();
-            lastReceptionTime_us = currentTime_us;
 
             // print to SD card
             writeCanFrameToSD(frame, timestamp, 0, log_file);
@@ -369,7 +369,6 @@ void loop()
         {
             // log timestamps
             unsigned long long timestamp = getEpochMicroseconds();
-            lastReceptionTime_us = currentTime_us;
 
             // OBD response handling
             if (frame.identifier >= 0x7E8 && frame.identifier <= 0x7EF)
@@ -417,13 +416,6 @@ void loop()
         }
 
         // TODO (virtual CAN) IMU
-
-        // print CAN timeout if no frames received
-        if (currentTime_us - lastReceptionTime_us > 2000000)
-        {
-            Serial.println("Waiting for OBD response...");
-            lastReceptionTime_us = currentTime_us;
-        }
 
         break;
     }
