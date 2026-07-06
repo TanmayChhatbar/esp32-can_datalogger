@@ -235,14 +235,14 @@ void setup()
     // set up CAN buses
     esp_err_t err;
     Serial.println("bus0");
-    err = setupCAN(bus0, 0, bus0_SX, bus0_TX, bus0_RX);
+    err = setupCAN(bus0, 0, CAN0_SX, CAN0_TX, CAN0_RX);
     if (err != ESP_OK)
         Serial.printf("\tFailed: %s\n", esp_err_to_name(err));
     else
         Serial.println("\tInitialized");
 
     Serial.println("bus1");
-    err = setupCAN(bus1, 1, bus1_SX, bus1_TX, bus1_RX);
+    err = setupCAN(bus1, 1, CAN1_SX, CAN1_TX, CAN1_RX);
     if (err != ESP_OK)
         Serial.printf("\tFailed: %s\n", esp_err_to_name(err));
     else

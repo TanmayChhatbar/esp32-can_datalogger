@@ -2,7 +2,21 @@
 
 #include <Arduino.h>
 
-esp_err_t setupCAN(twai_node_handle_t &bus,
+static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_t *edata, void *user_ctx)
+{
+    uint8_t recv_buff[8];
+    twai_frame_t rx_frame = {
+        .buffer = recv_buff,
+        .buffer_len = sizeof(recv_buff),
+    };
+    if (ESP_OK == twai_node_receive_from_isr(handle, &rx_frame))
+    {
+        // TODO receive ok, push to write queue
+    }
+    return false;
+}
+
+esp_err_t setupCAN(twai_node_handle_t bus,
                    uint8_t controllerId,
                    uint8_t sxPin,
                    uint8_t txPin,
@@ -14,31 +28,35 @@ esp_err_t setupCAN(twai_node_handle_t &bus,
         digitalWrite(sxPin, LOW);
     }
 
-    // TODO
-    twai_onchip_node_config_t g_config =
-        TWAI_ONCHIP_NODE_CONFIG_DEFAULT((gpio_num_t)txPin,
-                                        (gpio_num_t)rxPin,
-                                        TWAI_MODE_NORMAL);
+    twai_onchip_node_config_t cfg =
+        {
+            .io_cfg = {
+                .tx = (gpio_num_t)txPin,
+                .rx = (gpio_num_t)rxPin,
+                .quanta_clk_out = (gpio_num_t)-1,
+                .bus_off_indicator = (gpio_num_t)-1},
+            .bit_timing = {.bitrate = 500000, .sp_permill = 800, .ssp_permill = 0},
+            .fail_retry_cnt = -1,
+            .tx_queue_depth = OBD_TX_LEN,
+            .intr_priority = 1,
+            .flags = {.enable_self_test = 0, .enable_loopback = 0, .enable_listen_only = 0, .no_receive_rtr = 0}};
 
-    g_config.controller_id = controllerId;
-    g_config.tx_queue_len = OBD_TX_LEN;
-    g_config.rx_queue_len = 20;
-    g_config.alerts_enabled = TWAI_ALERT_NONE;
+    twai_event_callbacks_t user_cbs = {
+        .on_rx_done = twai_rx_cb,
+    };
+    twai_node_register_event_callbacks(bus, &user_cbs, NULL);
 
-    twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
-    twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
-
-    esp_err_t err = twai_driver_install_v2(&g_config, &t_config, &f_config, &bus);
+    esp_err_t err = twai_new_node_onchip(&cfg, &bus);
     if (err != ESP_OK)
     {
         bus = nullptr;
         return err;
     }
 
-    err = twai_start_v2(bus);
+    twai_node_enable(bus);
     if (err != ESP_OK)
     {
-        twai_driver_uninstall_v2(bus);
+        twai_node_delete(bus);
         bus = nullptr;
         return err;
     }
@@ -57,13 +75,24 @@ String CanFrameToString(const twai_frame_t &frame, uint64_t timestamp, const uin
              bus_id,
              frame.header.dlc);
     String outString = String(buf);
-    for (int i = 0; i < frame.header.dlc; i++)
+
+    size_t data_len = frame.header.dlc;
+    if (data_len > 8)
     {
-        if (frame.data[i] < 0x10)
-            outString += "0";
-        outString += String(frame.data[i], HEX) + ",";
+        data_len = 8; // limit to 8 bytes for standard CAN frames
     }
-    for (int i = frame.header.dlc; i < 8; i++)
+    if (data_len > frame.buffer_len)
+    {
+        data_len = frame.buffer_len; // limit to available buffer length
+    }
+
+    for (size_t i = 0; i < data_len; i++)
+    {
+        if (frame.buffer[i] < 0x10)
+            outString += "0";
+        outString += String(frame.buffer[i], HEX) + ",";
+    }
+    for (size_t i = data_len; i < 8; i++)
     {
         outString += "00,";
     }
@@ -83,9 +112,9 @@ size_t CanFrameToCharArray(char *out, size_t out_size, const twai_frame_t &frame
     char *p = out + n;
 
     static const char hex[] = "0123456789ABCDEF";
-    for (int i = 0; i < 8; i++)
+    for (size_t i = 0; i < 8; i++)
     {
-        uint8_t b = (i < frame.header.dlc) ? frame.data[i] : 0;
+        uint8_t b = (i < frame.header.dlc) ? frame.buffer[i] : 0;
 
         *p++ = hex[b >> 4];
         *p++ = hex[b & 0x0F];
@@ -95,17 +124,17 @@ size_t CanFrameToCharArray(char *out, size_t out_size, const twai_frame_t &frame
     return p - out;
 }
 
-esp_err_t requestOBDSignal(twai_handle_t &can, OBD_signal signal)
+esp_err_t requestOBDSignal(twai_node_handle_t bus, OBD_signal signal)
 {
     twai_frame_t frame;
-    frame.identifier = 0x7DF; // functional request ID for OBD2
-    frame.data_length_code = 8;
-    frame.data[0] = 0x02;   // number of additional bytes (Service ID + PID)
-    frame.data[1] = 0x01;   // service ID for current data
-    frame.data[2] = signal; // PID for the requested signal
-    for (int i = 3; i < 8; i++)
+    frame.header.id = 0x7DF; // functional request ID for OBD2
+    frame.header.dlc = 8;
+    frame.buffer[0] = 0x02;   // number of additional bytes (Service ID + PID)
+    frame.buffer[1] = 0x01;   // service ID for current data
+    frame.buffer[2] = signal; // PID for the requested signal
+    for (size_t i = 3; i < 8; i++)
     {
-        frame.data[i] = 0x00; // padding
+        frame.buffer[i] = 0x00; // padding
     }
-    return twai_transmit_v2(can, &frame, pdMS_TO_TICKS(1000));
+    return twai_node_transmit(bus, &frame, pdMS_TO_TICKS(1000));
 }

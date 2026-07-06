@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include "esp_twai.h"
 #include "esp_twai_onchip.h"
 #include "esp_twai_types.h"
 #include "esp_err.h"
