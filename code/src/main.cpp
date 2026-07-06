@@ -12,8 +12,8 @@
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 
-twai_handle_t can0 = nullptr;
-twai_handle_t can1 = nullptr;
+twai_node_handle_t bus0 = nullptr;
+twai_node_handle_t bus1 = nullptr;
 volatile int OBD_sigCount_1Hz_index = 0;
 volatile int OBD_sigCount_10Hz_index = 0;
 volatile OBD_signal OBD_1Hz_ID = OBD_SIGNALS_OF_INTEREST_1HZ[0];   // current OBD signal for which response is expected, -1 means no signal requested yet for delay between request batches
@@ -36,7 +36,7 @@ void vTask_OBD_Request_1Hz(void *parameter)
     {
         // handle queue-related timeout errors
         twai_status_info_t status_info;
-        twai_get_status_info_v2(can1, &status_info);
+        twai_get_status_info_v2(bus1, &status_info);
 
         // if starting fresh, wait 1Hz equivalent time
         if (OBD_sigCount_1Hz_index == -1)
@@ -54,7 +54,7 @@ void vTask_OBD_Request_1Hz(void *parameter)
             {
                 OBD_1Hz_ID = target;
 
-                esp_err_t err = requestOBDSignal(can1, OBD_1Hz_ID);
+                esp_err_t err = requestOBDSignal(bus1, OBD_1Hz_ID);
                 if (err == ESP_OK)
                 {
                     lastOBDRequestTime_1Hz_us = micros();
@@ -83,7 +83,7 @@ void vTask_OBD_Request_10Hz(void *parameter)
     {
         // handle queue-related timeout errors
         twai_status_info_t status_info;
-        twai_get_status_info_v2(can1, &status_info);
+        twai_get_status_info_v2(bus1, &status_info);
 
         // if starting fresh, wait 1Hz equivalent time
         if (OBD_sigCount_10Hz_index == -1)
@@ -101,7 +101,7 @@ void vTask_OBD_Request_10Hz(void *parameter)
             {
                 OBD_10Hz_ID = target;
 
-                esp_err_t err = requestOBDSignal(can1, OBD_10Hz_ID);
+                esp_err_t err = requestOBDSignal(bus1, OBD_10Hz_ID);
                 if (err == ESP_OK)
                 {
                     lastOBDRequestTime_10Hz_us = micros();
@@ -234,15 +234,15 @@ void setup()
 
     // set up CAN buses
     esp_err_t err;
-    Serial.println("CAN0");
-    err = setupCAN(can0, 0, CAN0_SX, CAN0_TX, CAN0_RX);
+    Serial.println("bus0");
+    err = setupCAN(bus0, 0, bus0_SX, bus0_TX, bus0_RX);
     if (err != ESP_OK)
         Serial.printf("\tFailed: %s\n", esp_err_to_name(err));
     else
         Serial.println("\tInitialized");
 
-    Serial.println("CAN1");
-    err = setupCAN(can1, 1, CAN1_SX, CAN1_TX, CAN1_RX);
+    Serial.println("bus1");
+    err = setupCAN(bus1, 1, bus1_SX, bus1_TX, bus1_RX);
     if (err != ESP_OK)
         Serial.printf("\tFailed: %s\n", esp_err_to_name(err));
     else
@@ -348,7 +348,7 @@ void loop()
         currentTime_us = micros();
 
         twai_message_t frame;
-        if (twai_receive_v2(can0, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
+        if (twai_receive_v2(bus0, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
         {
             // log timestamps
             unsigned long timestamp = getEpochMicroseconds();
@@ -357,7 +357,7 @@ void loop()
             writeCanFrameToSD(frame, timestamp, 0, log_file);
         }
 
-        if (twai_receive_v2(can1, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
+        if (twai_receive_v2(bus1, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
         {
             // log timestamps
             unsigned long timestamp = getEpochMicroseconds();

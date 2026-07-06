@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-esp_err_t setupCAN(twai_handle_t &bus,
+esp_err_t setupCAN(twai_node_handle_t &bus,
                    uint8_t controllerId,
                    uint8_t sxPin,
                    uint8_t txPin,
@@ -14,10 +14,11 @@ esp_err_t setupCAN(twai_handle_t &bus,
         digitalWrite(sxPin, LOW);
     }
 
-    twai_general_config_t g_config =
-        TWAI_GENERAL_CONFIG_DEFAULT((gpio_num_t)txPin,
-                                    (gpio_num_t)rxPin,
-                                    TWAI_MODE_NORMAL);
+    // TODO
+    twai_onchip_node_config_t g_config =
+        TWAI_ONCHIP_NODE_CONFIG_DEFAULT((gpio_num_t)txPin,
+                                        (gpio_num_t)rxPin,
+                                        TWAI_MODE_NORMAL);
 
     g_config.controller_id = controllerId;
     g_config.tx_queue_len = OBD_TX_LEN;
@@ -45,46 +46,46 @@ esp_err_t setupCAN(twai_handle_t &bus,
     return ESP_OK;
 }
 
-String CanFrameToString(const twai_message_t &frame, uint64_t timestamp, const uint8_t bus)
+String CanFrameToString(const twai_frame_t &frame, uint64_t timestamp, const uint8_t bus_id)
 {
     char buf[70];
     // 1781820252108000,00000240,false,Rx,0,1,00,00,00,00,00,00,00,00,
     snprintf(buf, sizeof(buf), "%llu,%08X,%s,%s,%d,%d,", timestamp,
-                                                        frame.identifier,
-                                                        frame.extd ? "true" : "false",
-                                                        frame.rtr ? "Tx" : "Rx",
-                                                        bus,
-                                                        frame.data_length_code);
+             frame.header.id,
+             frame.header.ide ? "true" : "false",
+             frame.header.rtr ? "Tx" : "Rx",
+             bus_id,
+             frame.header.dlc);
     String outString = String(buf);
-    for (int i = 0; i < frame.data_length_code; i++)
+    for (int i = 0; i < frame.header.dlc; i++)
     {
         if (frame.data[i] < 0x10)
             outString += "0";
         outString += String(frame.data[i], HEX) + ",";
     }
-    for (int i = frame.data_length_code; i < 8; i++)
+    for (int i = frame.header.dlc; i < 8; i++)
     {
         outString += "00,";
     }
     return outString;
 }
 
-size_t CanFrameToCharArray(char *out, size_t out_size, const twai_message_t &frame, uint64_t timestamp, const uint8_t bus)
+size_t CanFrameToCharArray(char *out, size_t out_size, const twai_frame_t &frame, uint64_t timestamp, const uint8_t bus_id)
 {
     // 1781820252108000,00000240,false,Rx,0,1,00,00,00,00,00,00,00,00,
     int n = snprintf(out, out_size, "%llu,%08X,%s,%s,%d,%d,", timestamp,
-                     frame.identifier,
-                     frame.extd ? "true" : "false",
-                     frame.rtr ? "Tx" : "Rx",
-                     bus,
-                     frame.data_length_code);
+                     frame.header.id,
+                     frame.header.ide ? "true" : "false",
+                     frame.header.rtr ? "Tx" : "Rx",
+                     bus_id,
+                     frame.header.dlc);
 
     char *p = out + n;
-    
+
     static const char hex[] = "0123456789ABCDEF";
     for (int i = 0; i < 8; i++)
     {
-        uint8_t b = (i < frame.data_length_code) ? frame.data[i] : 0;
+        uint8_t b = (i < frame.header.dlc) ? frame.data[i] : 0;
 
         *p++ = hex[b >> 4];
         *p++ = hex[b & 0x0F];
@@ -96,7 +97,7 @@ size_t CanFrameToCharArray(char *out, size_t out_size, const twai_message_t &fra
 
 esp_err_t requestOBDSignal(twai_handle_t &can, OBD_signal signal)
 {
-    twai_message_t frame;
+    twai_frame_t frame;
     frame.identifier = 0x7DF; // functional request ID for OBD2
     frame.data_length_code = 8;
     frame.data[0] = 0x02;   // number of additional bytes (Service ID + PID)
