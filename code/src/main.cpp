@@ -18,8 +18,8 @@ volatile int OBD_sigCount_1Hz_index = 0;
 volatile int OBD_sigCount_10Hz_index = 0;
 volatile OBD_signal OBD_1Hz_ID = OBD_SIGNALS_OF_INTEREST_1HZ[0];   // current OBD signal for which response is expected, -1 means no signal requested yet for delay between request batches
 volatile OBD_signal OBD_10Hz_ID = OBD_SIGNALS_OF_INTEREST_10HZ[0]; // current OBD signal for which response is expected, -1 means no signal requested yet for delay between request batches
-volatile unsigned long long lastOBDRequestTime_1Hz_us = 0;
-volatile unsigned long long lastOBDRequestTime_10Hz_us = 0;
+volatile unsigned long lastOBDRequestTime_1Hz_us = 0;
+volatile unsigned long lastOBDRequestTime_10Hz_us = 0;
 logging_mode_t logging_mode = LOGGING_MODE_WAITGPS;
 bool stopOBDTask_1Hz = false;
 bool stopOBDTask_10Hz = false;
@@ -256,10 +256,10 @@ void loop()
 {
     // init local vars
     static File log_file;
-    static unsigned long long startTime_us = micros();
-    static unsigned long long lastRequestTime_1Hz_us = startTime_us;
-    static unsigned long long lastRequestTime_10Hz_us = startTime_us;
-    static unsigned long long currentTime_us = startTime_us;
+    static unsigned long startTime_us = micros();
+    static unsigned long lastRequestTime_1Hz_us = startTime_us;
+    static unsigned long lastRequestTime_10Hz_us = startTime_us;
+    static unsigned long currentTime_us = startTime_us;
     static unsigned long ledTime_ms = millis();
     static bool wait_gps_print = false;
     static unsigned long wait_gps_start_ms = millis();
@@ -321,7 +321,6 @@ void loop()
     case LOGGING_MODE_START:
     {
         // filename
-        unsigned long long starttimertest = micros();
         const char *filename = getFilenameForCurrentTime();
         log_file = SD.open(filename, FILE_WRITE); // TODO takes more than 0.7 seconds
         Serial.print("Logging to file: ");
@@ -352,7 +351,7 @@ void loop()
         if (twai_receive_v2(can0, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
         {
             // log timestamps
-            unsigned long long timestamp = getEpochMicroseconds();
+            unsigned long timestamp = getEpochMicroseconds();
 
             // print to SD card
             writeCanFrameToSD(frame, timestamp, 0, log_file);
@@ -361,7 +360,7 @@ void loop()
         if (twai_receive_v2(can1, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
         {
             // log timestamps
-            unsigned long long timestamp = getEpochMicroseconds();
+            unsigned long timestamp = getEpochMicroseconds();
 
             // OBD response handling
             if (frame.identifier >= 0x7E8 && frame.identifier <= 0x7EF)
@@ -397,7 +396,7 @@ void loop()
         // (virtual CAN) GPS
         if (readGPS())
         {
-            unsigned long long timestamp = getEpochMicroseconds();
+            unsigned long timestamp = getEpochMicroseconds();
             twai_message_t gps_frame[4];
             if (GPSFrameToCanFrame(gps_frame))
             {
