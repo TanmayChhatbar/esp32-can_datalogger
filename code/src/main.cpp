@@ -284,14 +284,7 @@ void loop()
             wait_gps_start_ms = millis();
         }
 
-        while (GPS.available())
-        {
-            GPS.read();
-        }
-        if (GPS.newNMEAreceived())
-        {
-            GPS.parse(GPS.lastNMEA());
-        }
+        readGPS();
 
         if (GPS.fix)
         {
