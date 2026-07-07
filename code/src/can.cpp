@@ -1,4 +1,8 @@
 #include "can.h"
+#include "sd_logger.h"
+#include <string.h>
+
+xQueueHandle canRxQueue = nullptr;
 
 static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_t *edata, void *user_ctx)
 {
@@ -7,26 +11,39 @@ static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_
         .buffer = data,
         .buffer_len = sizeof(data),
     };
-    if (twai_node_receive_from_isr(handle, &rx_frame) == ESP_OK)
-    {
-        uint8_t bus_id = (uint8_t)(uintptr_t)user_ctx;
-        log_frame_t log_frame = {
-            .frame = rx_frame,
-            .timestamp = getEpochMicroseconds(),
-            .bus_id = bus_id};
 
-        // receive ok, push to write queue
-        xQueueSend(canRxQueue, &log_frame, 0);
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    if (twai_node_receive_from_isr(handle, &rx_frame) == ESP_OK && canRxQueue != nullptr)
+    {
+        log_frame_t log_frame = {};
+        log_frame.header = rx_frame.header;
+        log_frame.header.timestamp = getEpochMicroseconds();
+        log_frame.bus_id = (uint8_t)(uintptr_t)user_ctx;
+
+        // copy data from rx_frame to log_frame
+        memcpy(log_frame.data, rx_frame.buffer, log_frame.header.dlc);
+
+        // send to queue
+        xQueueSendFromISR(canRxQueue, &log_frame, &higher_priority_task_woken);
     }
-    return false;
+    return higher_priority_task_woken == pdTRUE;
 }
 
-esp_err_t setupCAN(twai_node_handle_t bus,
+esp_err_t setupCAN(twai_node_handle_t &bus,
                    uint8_t controllerId,
                    uint8_t sxPin,
                    uint8_t txPin,
                    uint8_t rxPin)
 {
+    if (canRxQueue == nullptr)
+    {
+        canRxQueue = xQueueCreate(CAN_RX_QUEUE_LEN, sizeof(log_frame_t));
+        if (canRxQueue == nullptr)
+        {
+            return ESP_ERR_NO_MEM;
+        }
+    }
+
     if (sxPin >= 0)
     {
         pinMode(sxPin, OUTPUT);
@@ -46,12 +63,6 @@ esp_err_t setupCAN(twai_node_handle_t bus,
             .intr_priority = 1,
             .flags = {.enable_self_test = 0, .enable_loopback = 0, .enable_listen_only = 0, .no_receive_rtr = 0}};
 
-    twai_event_callbacks_t user_cbs = {
-        .on_rx_done = twai_rx_cb,
-    };
-
-    twai_node_register_event_callbacks(bus, &user_cbs, (void *)(uintptr_t)controllerId);
-
     esp_err_t err = twai_new_node_onchip(&cfg, &bus);
     if (err != ESP_OK)
     {
@@ -59,7 +70,19 @@ esp_err_t setupCAN(twai_node_handle_t bus,
         return err;
     }
 
-    twai_node_enable(bus);
+    twai_event_callbacks_t user_cbs = {
+        .on_rx_done = twai_rx_cb,
+    };
+
+    err = twai_node_register_event_callbacks(bus, &user_cbs, (void *)(uintptr_t)controllerId);
+    if (err != ESP_OK)
+    {
+        twai_node_delete(bus);
+        bus = nullptr;
+        return err;
+    }
+
+    err = twai_node_enable(bus);
     if (err != ESP_OK)
     {
         twai_node_delete(bus);
@@ -70,33 +93,24 @@ esp_err_t setupCAN(twai_node_handle_t bus,
     return ESP_OK;
 }
 
-String CanFrameToString(const twai_frame_t &frame, uint64_t timestamp, const uint8_t bus_id)
+String CanFrameToString(const log_frame_t log_frame)
 {
     char buf[70];
     // 1781820252108000,00000240,false,Rx,0,1,00,00,00,00,00,00,00,00,
-    snprintf(buf, sizeof(buf), "%llu,%08X,%s,%s,%d,%d,", timestamp,
-             frame.header.id,
-             frame.header.ide ? "true" : "false",
-             frame.header.rtr ? "Tx" : "Rx",
-             bus_id,
-             frame.header.dlc);
+    snprintf(buf, sizeof(buf), "%llu,%08X,%s,%s,%d,%d,", log_frame.header.timestamp,
+             log_frame.header.id,
+             log_frame.header.ide ? "true" : "false",
+             log_frame.header.rtr ? "Tx" : "Rx",
+             log_frame.bus_id,
+             log_frame.header.dlc);
     String outString = String(buf);
 
-    size_t data_len = frame.header.dlc;
-    if (data_len > 8)
-    {
-        data_len = 8; // limit to 8 bytes for standard CAN frames
-    }
-    if (data_len > frame.buffer_len)
-    {
-        data_len = frame.buffer_len; // limit to available buffer length
-    }
-
+    size_t data_len = log_frame.header.dlc;
     for (size_t i = 0; i < data_len; i++)
     {
-        if (frame.buffer[i] < 0x10)
+        if (log_frame.data[i] < 0x10)
             outString += "0";
-        outString += String(frame.buffer[i], HEX) + ",";
+        outString += String(log_frame.data[i], HEX) + ",";
     }
     for (size_t i = data_len; i < 8; i++)
     {
@@ -105,42 +119,18 @@ String CanFrameToString(const twai_frame_t &frame, uint64_t timestamp, const uin
     return outString;
 }
 
-size_t CanFrameToCharArray(char *out, size_t out_size, const twai_frame_t &frame, uint64_t timestamp, const uint8_t bus_id)
+esp_err_t requestOBDSignal(twai_node_handle_t &bus, OBD_signal signal)
 {
-    // 1781820252108000,00000240,false,Rx,0,1,00,00,00,00,00,00,00,00,
-    int n = snprintf(out, out_size, "%llu,%08X,%s,%s,%d,%d,", timestamp,
-                     frame.header.id,
-                     frame.header.ide ? "true" : "false",
-                     frame.header.rtr ? "Tx" : "Rx",
-                     bus_id,
-                     frame.header.dlc);
+    uint8_t data[8] = {0};
+    data[0] = 0x02;            // number of additional bytes (Service ID + PID)
+    data[1] = 0x01;            // service ID for current data
+    data[2] = (uint8_t)signal; // PID for the requested signal
 
-    char *p = out + n;
-
-    static const char hex[] = "0123456789ABCDEF";
-    for (size_t i = 0; i < 8; i++)
-    {
-        uint8_t b = (i < frame.header.dlc) ? frame.buffer[i] : 0;
-
-        *p++ = hex[b >> 4];
-        *p++ = hex[b & 0x0F];
-        *p++ = ',';
-    }
-    *p = '\0';
-    return p - out;
-}
-
-esp_err_t requestOBDSignal(twai_node_handle_t bus, OBD_signal signal)
-{
-    twai_frame_t frame;
+    twai_frame_t frame = {};
     frame.header.id = 0x7DF; // functional request ID for OBD2
     frame.header.dlc = 8;
-    frame.buffer[0] = 0x02;   // number of additional bytes (Service ID + PID)
-    frame.buffer[1] = 0x01;   // service ID for current data
-    frame.buffer[2] = signal; // PID for the requested signal
-    for (size_t i = 3; i < 8; i++)
-    {
-        frame.buffer[i] = 0x00; // padding
-    }
+    frame.buffer = data;
+    frame.buffer_len = sizeof(data);
+
     return twai_node_transmit(bus, &frame, pdMS_TO_TICKS(1000));
 }

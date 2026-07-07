@@ -4,7 +4,6 @@
 #include "esp_twai_onchip.h"
 #include "esp_twai_types.h"
 #include "esp_err.h"
-#include "sd_logger.h"
 // https://docs.espressif.com/projects/esp-idf/en/v6.0.2/esp32c6/api-reference/peripherals/twai.html
 
 enum OBD_signal : uint8_t
@@ -23,20 +22,21 @@ enum OBD_signal : uint8_t
 
 struct log_frame_t
 {
-    twai_frame_t frame;
-    unsigned long long timestamp;
+    twai_frame_header_t header;
+    uint8_t data[8];
     uint8_t bus_id;
 };
 
 #define OBD_TX_LEN 10
+#define CAN_RX_QUEUE_LEN 256
 
 const OBD_signal OBD_SIGNALS_OF_INTEREST_1HZ[] = {OBD_FUEL_LEVEL, OBD_RUNNING_TIME, OBD_ODOMETER};
 const OBD_signal OBD_SIGNALS_OF_INTEREST_10HZ[] = {OBD_ENGINE_LOAD, OBD_VEHICLE_SPEED};
 
 esp_err_t setupCAN(twai_node_handle_t &bus, uint8_t controllerId, uint8_t sxPin, uint8_t txPin, uint8_t rxPin);
 esp_err_t requestOBDSignal(twai_node_handle_t &bus, OBD_signal signal);
-String CanFrameToString(const twai_message_t &frame, const unsigned long long timestamp, const uint8_t bus_id);
-size_t CanFrameToCharArray(char *out, size_t out_size, const twai_message_t &frame, uint64_t timestamp, const uint8_t bus_id);
+String CanFrameToString(const log_frame_t log_frame);
+
 const uint8_t OBD_SIGCOUNT_1HZ = sizeof(OBD_SIGNALS_OF_INTEREST_1HZ) / sizeof(OBD_signal);
 const uint8_t OBD_SIGCOUNT_10HZ = sizeof(OBD_SIGNALS_OF_INTEREST_10HZ) / sizeof(OBD_signal);
-xQueueHandle canRxQueue;
+extern xQueueHandle canRxQueue;

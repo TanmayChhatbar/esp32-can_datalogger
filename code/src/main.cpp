@@ -347,38 +347,32 @@ void loop()
     {
         currentTime_us = micros();
 
-        twai_frame_t frame;
-        if (twai_receive_v2(bus0, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
+        if (canRxQueue != nullptr)
         {
-            // log timestamps
-            unsigned long timestamp = getEpochMicroseconds();
-
-            // print to SD card
-            writeCanFrameToSD(frame, timestamp, 0, log_file);
-        }
-
-        if (twai_receive_v2(bus1, &frame, pdMS_TO_TICKS(2)) == ESP_OK)
-        {
-            // log timestamps
-            unsigned long timestamp = getEpochMicroseconds();
-
-            // OBD response handling
-            if (frame.identifier >= 0x7E8 && frame.identifier <= 0x7EF)
+            log_frame_t log_frame;
+            if (xQueueReceive(canRxQueue, &log_frame, 0) == pdTRUE)
             {
-                uint8_t mode = frame.data[1]; // should be 0x41 for response to 01
-                uint8_t pid = frame.data[2];
-                if (mode == 0x41 && pid == OBD_1Hz_ID)
+                // OBD response handling
+                if (log_frame.bus_id == 1 && log_frame.header.id >= 0x7E8 && log_frame.header.id <= 0x7EF && log_frame.header.dlc > 2)
                 {
-                    OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 2)) - 1; // increment and wait at -1
+                    uint8_t mode = log_frame.data[1]; // should be 0x41 for response to 01
+                    uint8_t pid = log_frame.data[2];
+                    if (mode == 0x41)
+                    {
+                        if (pid == OBD_1Hz_ID)
+                        {
+                            OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 2)) - 1; // increment and wait at -1
+                        }
+                        if (pid == OBD_10Hz_ID)
+                        {
+                            OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 2)) - 1; // increment and wait at -1
+                        }
+                    }
                 }
-                if (mode == 0x41 && pid == OBD_10Hz_ID)
-                {
-                    OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 2)) - 1; // increment and wait at -1
-                }
-            }
 
-            // print to SD card
-            writeCanFrameToSD(frame, timestamp, 1, log_file);
+                // print to SD card
+                writeCanFrameToSD(log_frame, log_file);
+            }
         }
 
         // move to next OBD signal request if timeout
@@ -396,13 +390,18 @@ void loop()
         // (virtual CAN) GPS
         if (readGPS())
         {
-            unsigned long timestamp = getEpochMicroseconds();
-            twai_message_t gps_frame[4];
+            unsigned long long timestamp = getEpochMicroseconds();
+            log_frame_t gps_frame[4] = {};
+            for (int i = 0; i < 4; i++)
+            {
+                gps_frame[i].header.timestamp = timestamp;
+                gps_frame[i].bus_id = 2;
+            }
             if (GPSFrameToCanFrame(gps_frame))
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    writeCanFrameToSD(gps_frame[i], timestamp, 2, log_file);
+                    writeCanFrameToSD(gps_frame[i], log_file);
                 }
             }
         }

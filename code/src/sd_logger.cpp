@@ -17,7 +17,7 @@ bool writeCanFrameToSD(const log_frame_t &log_frame, File &file)
     file.println(can_data_str);
 
     // print to serial for printing
-    // Serial.println(can_data_str);
+    Serial.println(can_data_str);
     
     return true;
 }

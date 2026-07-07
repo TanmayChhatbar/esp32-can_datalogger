@@ -70,11 +70,7 @@ bool GPSFrameToCanFrame(log_frame_t log_frame[4])
         .longitude = canmod_gps_gnss_position_longitude_encode(GPS.longitudeDegrees),
         .position_accuracy = canmod_gps_gnss_position_position_accuracy_encode(GPS.fixquality)
     };
-    if (log_frame[0].data_len < log_frame[0].header.dlc)
-    {
-        return false;
-    }
-    memset(log_frame[0].data, 0, log_frame[0].data_len);
+    memset(log_frame[0].data, 0, log_frame[0].header.dlc);
     canmod_gps_gnss_position_pack(log_frame[0].data, &gps_position, log_frame[0].header.dlc);
 
     log_frame[1].header.id = CANMOD_GPS_GNSS_ALTITUDE_FRAME_ID;
@@ -85,11 +81,7 @@ bool GPSFrameToCanFrame(log_frame_t log_frame[4])
         .altitude = canmod_gps_gnss_altitude_altitude_encode(GPS.altitude),
         .altitude_accuracy = 0 // TODO: implement altitude accuracy
     };
-    if (log_frame[1].data_len < log_frame[1].header.dlc)
-    {
-        return false;
-    }
-    memset(log_frame[1].data, 0, log_frame[1].data_len);
+    memset(log_frame[1].data, 0, log_frame[1].header.dlc);
     canmod_gps_gnss_altitude_pack(log_frame[1].data, &gps_altitude, log_frame[1].header.dlc);
 
     log_frame[2].header.id = CANMOD_GPS_GNSS_SPEED_FRAME_ID;
@@ -100,11 +92,7 @@ bool GPSFrameToCanFrame(log_frame_t log_frame[4])
         .speed = canmod_gps_gnss_speed_speed_encode(GPS.speed),
         .speed_accuracy = 0 // TODO: implement speed accuracy
     };
-    if (log_frame[2].data_len < log_frame[2].header.dlc)
-    {
-        return false;
-    }
-    memset(log_frame[2].data, 0, log_frame[2].data_len);
+    memset(log_frame[2].data, 0, log_frame[2].header.dlc);
     canmod_gps_gnss_speed_pack(log_frame[2].data, &gps_speed, log_frame[2].header.dlc);
 
     log_frame[3].header.id = CANMOD_GPS_GNSS_STATUS_FRAME_ID;
@@ -114,11 +102,7 @@ bool GPSFrameToCanFrame(log_frame_t log_frame[4])
         .fix_type = GPS.fixquality,
         .satellites = GPS.satellites,
     };
-    if (log_frame[3].data_len < log_frame[3].header.dlc)
-    {
-        return false;
-    }
-    memset(log_frame[3].data, 0, log_frame[3].data_len);
+    memset(log_frame[3].data, 0, log_frame[3].header.dlc);
     canmod_gps_gnss_status_pack(log_frame[3].data, &gps_status, log_frame[3].header.dlc);
 
     return true;
