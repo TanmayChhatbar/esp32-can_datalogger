@@ -8,7 +8,7 @@ uint64_t getEpochMicroseconds()
     return ((int64_t)tv.tv_sec * 1000000LL) + tv.tv_usec;
 }
 
-bool writeCanFrameToSD(const twai_message_t &frame, unsigned long long timestamp, const uint8_t bus, File &file)
+bool writeCanFrameToSD(const twai_frame_t &frame, unsigned long long timestamp, const uint8_t bus, File &file)
 {
     // convert to string
     // char can_data_str[64];
