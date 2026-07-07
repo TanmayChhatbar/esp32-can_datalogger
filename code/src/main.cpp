@@ -191,7 +191,7 @@ void setup()
     {
         delay(100);
     }
-    Serial.begin(460800);
+    Serial.begin(921600);
 
     // set up on-board LEDs
     setupLED();
