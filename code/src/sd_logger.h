@@ -16,7 +16,7 @@ enum logging_mode_t
     LOGGING_MODE_WIFI_STOP = 6
 };
 
-bool writeCanFrameToSD(const twai_frame_t &frame, unsigned long long timestamp, const uint8_t bus, File &file);
+bool writeCanFrameToSD(const log_frame_t &log_frame, File &file);
 bool writeCANHeaderToSD(File &file);
 const char *getFilenameForCurrentTime();
 uint64_t getEpochMicroseconds();
