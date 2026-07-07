@@ -225,7 +225,7 @@ void setup()
         Serial.println("\tWaiting for SD card...");
         delay(1000);
     }
-    while (!SD.begin(SPI_CS_SD, SPI, 400000))
+    while (!SD.begin(SPI_CS_SD, SPI, 40000000))
     {
         Serial.println("\tFailed to initialize");
         delay(1000);
