@@ -12,4 +12,4 @@ extern Adafruit_GPS GPS;
 bool setupGPS();
 bool readGPS();
 void syncTimeFromGPS();
-bool GPSFrameToCanFrame(twai_message_t frame[4]);
+bool GPSFrameToCanFrame(twai_frame_t frame[4]);
