@@ -259,7 +259,6 @@ void loop()
     static unsigned long startTime_us = micros();
     static unsigned long lastRequestTime_1Hz_us = startTime_us;
     static unsigned long lastRequestTime_10Hz_us = startTime_us;
-    static unsigned long currentTime_us = startTime_us;
     static unsigned long ledTime_ms = millis();
     static bool wait_gps_print = false;
     static unsigned long wait_gps_start_ms = millis();
@@ -334,7 +333,6 @@ void loop()
         startTime_us = micros() - GPS.milliseconds * 1000; // so that timestamps are relative to the GPS time to the second
         lastRequestTime_1Hz_us = startTime_us;
         lastRequestTime_10Hz_us = startTime_us;
-        currentTime_us = startTime_us;
 
         // start OBD request tasks
         xTaskCreatePinnedToCore(vTask_OBD_Request_1Hz, "OBD_Request_1Hz", 4096, NULL, 1, NULL, 0);
@@ -345,7 +343,7 @@ void loop()
 
     case LOGGING_MODE_ACTIVE:
     {
-        currentTime_us = micros();
+        unsigned long currentTime_us = micros();
 
         if (canRxQueue != nullptr)
         {

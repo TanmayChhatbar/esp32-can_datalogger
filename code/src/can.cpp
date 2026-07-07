@@ -93,30 +93,24 @@ esp_err_t setupCAN(twai_node_handle_t &bus,
     return ESP_OK;
 }
 
-String CanFrameToString(const log_frame_t log_frame)
+bool CanFrameToString(const log_frame_t &log_frame, char *buf, size_t buf_size)
 {
-    char buf[70];
     // 1781820252108000,00000240,false,Rx,0,1,00,00,00,00,00,00,00,00,
-    snprintf(buf, sizeof(buf), "%llu,%08X,%s,%s,%d,%d,", log_frame.header.timestamp,
+    return snprintf(buf, buf_size, "%llu,%08X,%s,%s,%d,%d,%02X,%02X,%02X,%02X,%02X,%02X,%02X,%02X,", log_frame.header.timestamp,
              log_frame.header.id,
              log_frame.header.ide ? "true" : "false",
              log_frame.header.rtr ? "Tx" : "Rx",
              log_frame.bus_id,
-             log_frame.header.dlc);
-    String outString = String(buf);
-
-    size_t data_len = log_frame.header.dlc;
-    for (size_t i = 0; i < data_len; i++)
-    {
-        if (log_frame.data[i] < 0x10)
-            outString += "0";
-        outString += String(log_frame.data[i], HEX) + ",";
-    }
-    for (size_t i = data_len; i < 8; i++)
-    {
-        outString += "00,";
-    }
-    return outString;
+             log_frame.header.dlc,
+             log_frame.data[0],
+             log_frame.data[1],
+             log_frame.data[2],
+             log_frame.data[3],
+             log_frame.data[4],
+             log_frame.data[5],
+             log_frame.data[6],
+             log_frame.data[7]
+            ) > 0;
 }
 
 esp_err_t requestOBDSignal(twai_node_handle_t &bus, OBD_signal signal)

@@ -11,22 +11,21 @@ uint64_t getEpochMicroseconds()
 bool writeCanFrameToSD(const log_frame_t &log_frame, File &file)
 {
     // convert to string
-    String can_data_str = CanFrameToString(log_frame);
+    char buf[70];
+    CanFrameToString(log_frame, buf, sizeof(buf));
 
     // write to file
-    file.println(can_data_str);
+    file.println(buf);
 
     // print to serial for printing
-    Serial.println(can_data_str);
+    Serial.println(buf);
     
     return true;
 }
 
 bool writeCANHeaderToSD(File &file)
 {
-    String header = "Time Stamp,ID,Extended,Dir,Bus,LEN,D1,D2,D3,D4,D5,D6,D7,D8";
-    file.println(header);
-    return true;
+    return file.println("Time Stamp,ID,Extended,Dir,Bus,LEN,D1,D2,D3,D4,D5,D6,D7,D8") > 0;
 }
 
 const char *getFilenameForCurrentTime()
