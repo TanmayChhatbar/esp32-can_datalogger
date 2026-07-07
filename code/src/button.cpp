@@ -6,11 +6,17 @@ bool Button::begin(unsigned int pin_number, unsigned long long_press_timer_ms, b
     _long_press_timer_ms = long_press_timer_ms;
     _state = BUTTON_NOT_PRESSED;
     _is_pulldown = is_pulldown;
+    _is_initialized = true;
     return true;
 }
 
 button_state_t Button::readButtonState()
 {
+    if (!_is_initialized)
+    {
+        _state = BUTTON_NOT_PRESSED;
+        return _state;
+    }
     unsigned long current_timer_ms = millis();
     bool current_read_state;
     if (_is_pulldown)
@@ -19,7 +25,7 @@ button_state_t Button::readButtonState()
     }
     else
     {
-        current_read_state = !digitalRead(_pin_number); // HIGH is pressed, LOW is not pressed if !is_pulldown
+        current_read_state = !digitalRead(_pin_number); // LOW is pressed, HIGH is not pressed if !is_pulldown
     }
 
     if (current_read_state) // if currently pressed

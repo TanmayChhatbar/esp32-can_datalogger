@@ -197,7 +197,7 @@ void setup()
     setupLED();
 
     // set up buttons
-    but1.begin(BUT1, 500, false);
+    but1.begin(BUT1, 750, false);
 
     // set up GPS
     Serial.println("GPS");
@@ -273,7 +273,7 @@ void loop()
         // wait for fix
         if (!wait_gps_print)
         {
-            Serial.println("\tWaiting for GPS fix");
+            Serial.println("GPS\n\tWaiting for GPS fix");
             wait_gps_print = true;
             wait_gps_start_ms = millis();
         }
