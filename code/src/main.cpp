@@ -20,7 +20,7 @@ volatile OBD_signal OBD_1Hz_ID = OBD_SIGNALS_OF_INTEREST_1HZ[0];   // current OB
 volatile OBD_signal OBD_10Hz_ID = OBD_SIGNALS_OF_INTEREST_10HZ[0]; // current OBD signal for which response is expected, -1 means no signal requested yet for delay between request batches
 volatile unsigned long lastOBDRequestTime_1Hz_us = 0;
 volatile unsigned long lastOBDRequestTime_10Hz_us = 0;
-logging_mode_t logging_mode = LOGGING_MODE_WAITGPS;
+logging_mode_t logging_mode = LOGGING_MODE_TEST;
 bool stopOBDTask_1Hz = false;
 bool stopOBDTask_10Hz = false;
 Button but1;
@@ -212,13 +212,20 @@ void setup()
     Serial.println("\tInitialized");
 
     // set up IMU
+    SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI, SPI_CS_IMU);
     Serial.println("IMU");
     if (!setupIMU())
-        Serial.println("\tTODO\n\tFailed to initialize");
+    {
+        Serial.println("\tFailed to initialize");
+        while (1)
+        {
+            delay(1000);
+        }
+    }
+    Serial.println("\tInitialized");
 
     // set up SD card
     pinMode(SD_CD, INPUT_PULLUP);
-    SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI, SPI_CS_SD);
     Serial.println("SD");
     while (digitalRead(SD_CD))
     {
@@ -421,6 +428,22 @@ void loop()
         stopOBDTask_10Hz = true;
 
         logging_mode = LOGGING_MODE_INACTIVE;
+        break;
+    }
+    case LOGGING_MODE_TEST:
+    {
+        // imu test
+        imu_event_t imu_event = {};
+        if (readIMU(imu_event))
+        {
+            log_frame_t imu_frame = {};
+            imu_frame.header.timestamp = getEpochMicroseconds();
+            imu_frame.bus_id = 2;
+            if (IMUFrameToCanFrame(imu_event, imu_frame))
+            {
+                printCanFrameToSerial(imu_frame);
+            }
+        }
         break;
     }
     default:

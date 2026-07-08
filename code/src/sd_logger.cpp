@@ -23,6 +23,18 @@ bool writeCanFrameToSD(const log_frame_t &log_frame, File &file)
     return true;
 }
 
+bool printCanFrameToSerial(const log_frame_t &log_frame)
+{
+    char buf[70];
+    if (!CanFrameToString(log_frame, buf, sizeof(buf)))
+    {
+        return false;
+    }
+
+    Serial.println(buf);
+    return true;
+}
+
 bool writeCANHeaderToSD(File &file)
 {
     return file.println("Time Stamp,ID,Extended,Dir,Bus,LEN,D1,D2,D3,D4,D5,D6,D7,D8") > 0;
