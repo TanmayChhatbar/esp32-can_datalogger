@@ -451,11 +451,23 @@ void loop()
         stopOBDTask_1Hz = true;
         stopOBDTask_10Hz = true;
         stopIMUTask_100Hz = true;
-        vTaskDelay(pdMS_TO_TICKS(500));
 
+        // flush can rx queue
+        log_frame_t log_frame;
+        unsigned long flush_time = millis();
+        while (xQueueReceive(canRxQueue, &log_frame, 0) == pdTRUE && millis() - flush_time < 1000)
+        {
+            writeCanFrameToSD(log_frame, log_file);
+        }
+        if (canRxQueue != nullptr)
+        {
+            xQueueReset(canRxQueue);
+        }
+        
         // close file
         Serial.print("Logging stopped: ");
         Serial.println(log_file.path());
+        log_file.flush();
         log_file.close();
 
         logging_mode = LOGGING_MODE_INACTIVE;
