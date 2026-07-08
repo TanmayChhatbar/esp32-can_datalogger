@@ -20,9 +20,10 @@ volatile OBD_signal OBD_1Hz_ID = OBD_SIGNALS_OF_INTEREST_1HZ[0];   // current OB
 volatile OBD_signal OBD_10Hz_ID = OBD_SIGNALS_OF_INTEREST_10HZ[0]; // current OBD signal for which response is expected, -1 means no signal requested yet for delay between request batches
 volatile unsigned long lastOBDRequestTime_1Hz_us = 0;
 volatile unsigned long lastOBDRequestTime_10Hz_us = 0;
-logging_mode_t logging_mode = LOGGING_MODE_TEST;
+logging_mode_t logging_mode = LOGGING_MODE_WAITGPS;
 bool stopOBDTask_1Hz = false;
 bool stopOBDTask_10Hz = false;
+bool stopIMUTask_100Hz = false;
 Button but1;
 
 ////////////////////////////////////////////////////////////////
@@ -72,6 +73,35 @@ void vTask_OBD_Request_1Hz(void *parameter)
     vTaskDelete(NULL);
 }
 
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
+void vTask_IMU_Poll_100Hz(void *parameter)
+{
+    TickType_t lastWake = xTaskGetTickCount();
+
+    while (!stopIMUTask_100Hz)
+    {
+        imu_event_t imu_event = {};
+        if (readIMU(imu_event))
+        {
+            log_frame_t imu_frame = {};
+            imu_frame.header.timestamp = getEpochMicroseconds();
+            imu_frame.bus_id = 2;
+            if (IMUFrameToCanFrame(imu_event, imu_frame))
+            {
+                if (canRxQueue != nullptr)
+                {
+                    xQueueSend(canRxQueue, &imu_frame, 0);
+                }
+            }
+        }
+        vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(10)); // 100hz
+    }
+
+    stopIMUTask_100Hz = false;
+    vTaskDelete(NULL);
+}
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 
@@ -344,6 +374,7 @@ void loop()
         // start OBD request tasks
         xTaskCreatePinnedToCore(vTask_OBD_Request_1Hz, "OBD_Request_1Hz", 4096, NULL, 1, NULL, 0);
         // xTaskCreatePinnedToCore(vTask_OBD_Request_10Hz, "OBD_Request_10Hz", 4096, NULL, 1, NULL, 0);
+        xTaskCreatePinnedToCore(vTask_IMU_Poll_100Hz, "IMU_Poll_100Hz", 4096, NULL, 1, NULL, 0);
 
         break;
     }
@@ -406,44 +437,32 @@ void loop()
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    writeCanFrameToSD(gps_frame[i], log_file);
+                    xQueueSend(canRxQueue, &gps_frame[i], 0);
                 }
             }
         }
-
-        // TODO (virtual CAN) IMU
 
         break;
     }
 
     case LOGGING_MODE_STOP:
     {
+        // stop OBD request tasks
+        stopOBDTask_1Hz = true;
+        stopOBDTask_10Hz = true;
+        stopIMUTask_100Hz = true;
+        vTaskDelay(pdMS_TO_TICKS(500));
+
         // close file
         Serial.print("Logging stopped: ");
         Serial.println(log_file.path());
         log_file.close();
-
-        // stop OBD request tasks
-        stopOBDTask_1Hz = true;
-        stopOBDTask_10Hz = true;
 
         logging_mode = LOGGING_MODE_INACTIVE;
         break;
     }
     case LOGGING_MODE_TEST:
     {
-        // imu test
-        imu_event_t imu_event = {};
-        if (readIMU(imu_event))
-        {
-            log_frame_t imu_frame = {};
-            imu_frame.header.timestamp = getEpochMicroseconds();
-            imu_frame.bus_id = 2;
-            if (IMUFrameToCanFrame(imu_event, imu_frame))
-            {
-                printCanFrameToSerial(imu_frame);
-            }
-        }
         break;
     }
     default:
