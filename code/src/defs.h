@@ -41,3 +41,6 @@
 // #define BUTS_V2
 // #define BUTS_V3
 // #define BUTS_V4
+
+// settings
+#define PRINT_TO_SERIAL 1

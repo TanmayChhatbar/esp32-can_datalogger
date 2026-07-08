@@ -18,7 +18,6 @@ enum logging_mode_t
 };
 
 bool writeCanFrameToSD(const log_frame_t &log_frame, File &file);
-bool printCanFrameToSerial(const log_frame_t &log_frame);
 bool writeCANHeaderToSD(File &file);
 const char *getFilenameForCurrentTime();
 uint64_t getEpochMicroseconds();

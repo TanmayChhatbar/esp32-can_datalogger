@@ -17,21 +17,10 @@ bool writeCanFrameToSD(const log_frame_t &log_frame, File &file)
     // write to file
     file.println(buf);
 
+#if PRINT_TO_SERIAL
     // print to serial for printing
-    // Serial.println(buf);
-    
-    return true;
-}
-
-bool printCanFrameToSerial(const log_frame_t &log_frame)
-{
-    char buf[70];
-    if (!CanFrameToString(log_frame, buf, sizeof(buf)))
-    {
-        return false;
-    }
-
     Serial.println(buf);
+#endif
     return true;
 }
 
