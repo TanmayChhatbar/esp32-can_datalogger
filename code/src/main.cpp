@@ -44,14 +44,24 @@ void vTask_OBD_Request_1Hz(void *parameter)
         {
             vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(1000)); // repeat every 1s
             OBD_sigCount_1Hz_index = 0;
+            lastOBDRequestTime_1Hz_us = micros();
             continue;
         }
 
-        if (status_info.tx_queue_remaining > OBD_TX_LEN - 1)
+        if (status_info.tx_queue_remaining > 0)
         {
+            if (micros() - lastOBDRequestTime_1Hz_us > 50000)
+            {
+                OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 1)) - 1;
+                if (OBD_sigCount_1Hz_index == -1)
+                {
+                    continue;
+                }
+            }
+
+            // if target changed, send request for next target
             OBD_signal target = OBD_SIGNALS_OF_INTEREST_1HZ[OBD_sigCount_1Hz_index];
-            // if target changed OR 50 ms timeout for OBD response, send request for next target
-            if (target != OBD_1Hz_ID || micros() - lastOBDRequestTime_1Hz_us > 500000)
+            if (target != OBD_1Hz_ID)
             {
                 OBD_1Hz_ID = target;
 
@@ -59,17 +69,78 @@ void vTask_OBD_Request_1Hz(void *parameter)
                 if (err == ESP_OK)
                 {
                     lastOBDRequestTime_1Hz_us = micros();
-                    Serial.println("(vTask_OBD_Request_1Hz)\tRequested OBD signal (1Hz): " + String(OBD_1Hz_ID, HEX));
+                    Serial.println("(vT_1Hz)\tRequested: " + OBDSignalToString(OBD_1Hz_ID));
                 }
                 else
                 {
-                    Serial.println("(vTask_OBD_Request_1Hz)\tOBD request failed (1Hz): " + String(OBD_1Hz_ID) + "\n\tError: " + String(esp_err_to_name(err)));
+                    Serial.println("(vT_1Hz)\tRequest failed: " + OBDSignalToString(OBD_1Hz_ID) + "\n\tError: " + String(esp_err_to_name(err)));
                 }
             }
         }
+
+        vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(5)); // repeat every 5ms
     }
 
     stopOBDTask_1Hz = false;
+    vTaskDelete(NULL);
+}
+
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
+void vTask_OBD_Request_10Hz(void *parameter)
+{
+    TickType_t lastWake = xTaskGetTickCount();
+
+    while (!stopOBDTask_10Hz)
+    {
+        // handle queue-related timeout errors
+        twai_node_status_t status_info;
+        twai_node_get_info(bus1, &status_info, NULL);
+
+        // if starting fresh, wait 1Hz equivalent time
+        if (OBD_sigCount_10Hz_index == -1)
+        {
+            vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(100)); // repeat every 100ms
+            OBD_sigCount_10Hz_index = 0;
+            lastOBDRequestTime_10Hz_us = micros();
+            continue;
+        }
+
+        if (status_info.tx_queue_remaining > 0)
+        {
+            if (micros() - lastOBDRequestTime_10Hz_us > 10000)
+            {
+                OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 1)) - 1;
+                if (OBD_sigCount_10Hz_index == -1)
+                {
+                    continue;
+                }
+            }
+
+            // if target changed, send request for next target
+            OBD_signal target = OBD_SIGNALS_OF_INTEREST_10HZ[OBD_sigCount_10Hz_index];
+            if (target != OBD_10Hz_ID)
+            {
+                OBD_10Hz_ID = target;
+
+                esp_err_t err = requestOBDSignal(bus1, OBD_10Hz_ID);
+                if (err == ESP_OK)
+                {
+                    lastOBDRequestTime_10Hz_us = micros();
+                    Serial.println("(vT_10Hz)\tRequested: " + OBDSignalToString(OBD_10Hz_ID));
+                }
+                else
+                {
+                    Serial.println("(vT_10Hz)\tRequest failed: " + OBDSignalToString(OBD_10Hz_ID) + "\n\tError: " + String(esp_err_to_name(err)));
+                }
+            }
+        }
+
+        vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(5)); // repeat every 5ms
+    }
+
+    stopOBDTask_10Hz = false;
     vTaskDelete(NULL);
 }
 
@@ -100,52 +171,6 @@ void vTask_IMU_Poll_100Hz(void *parameter)
     }
 
     stopIMUTask_100Hz = false;
-    vTaskDelete(NULL);
-}
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-
-void vTask_OBD_Request_10Hz(void *parameter)
-{
-    TickType_t lastWake = xTaskGetTickCount();
-
-    while (!stopOBDTask_10Hz)
-    {
-        // handle queue-related timeout errors
-        twai_node_status_t status_info;
-        twai_node_get_info(bus1, &status_info, NULL);
-
-        // if starting fresh, wait 1Hz equivalent time
-        if (OBD_sigCount_10Hz_index == -1)
-        {
-            vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(1000)); // repeat every 1s
-            OBD_sigCount_10Hz_index = 0;
-            continue;
-        }
-
-        if (status_info.tx_queue_remaining > OBD_TX_LEN - 1)
-        {
-            OBD_signal target = OBD_SIGNALS_OF_INTEREST_10HZ[OBD_sigCount_10Hz_index];
-            // if target changed OR 50 ms timeout for OBD response, send request for next target
-            if (target != OBD_10Hz_ID || micros() - lastOBDRequestTime_10Hz_us > 500000)
-            {
-                OBD_10Hz_ID = target;
-
-                esp_err_t err = requestOBDSignal(bus1, OBD_10Hz_ID);
-                if (err == ESP_OK)
-                {
-                    lastOBDRequestTime_10Hz_us = micros();
-                    Serial.println("(vTask_OBD_Request_10Hz)\tRequested OBD signal (10Hz): " + String(OBD_10Hz_ID, HEX));
-                }
-                else
-                {
-                    Serial.println("(vTask_OBD_Request_10Hz)\tOBD request failed (10Hz): " + String(OBD_10Hz_ID) + "\n\tError: " + String(esp_err_to_name(err)));
-                }
-            }
-        }
-    }
-
-    stopOBDTask_10Hz = false;
     vTaskDelete(NULL);
 }
 
@@ -294,8 +319,6 @@ void loop()
     // init local vars
     static File log_file;
     static unsigned long startTime_us = micros();
-    static unsigned long lastRequestTime_1Hz_us = startTime_us;
-    static unsigned long lastRequestTime_10Hz_us = startTime_us;
     static unsigned long ledTime_ms = millis();
     static bool wait_gps_print = false;
     static unsigned long wait_gps_start_ms = millis();
@@ -312,7 +335,7 @@ void loop()
             wait_gps_print = true;
             wait_gps_start_ms = millis();
         }
-        if (millis() - wait_gps_start_ms > 10000)
+        if (millis() - wait_gps_start_ms > 1000)
         {
             Serial.print('.');
             wait_gps_start_ms = millis();
@@ -366,12 +389,10 @@ void loop()
 
         // init vars
         startTime_us = micros() - GPS.milliseconds * 1000; // so that timestamps are relative to the GPS time to the second
-        lastRequestTime_1Hz_us = startTime_us;
-        lastRequestTime_10Hz_us = startTime_us;
 
         // start OBD request tasks
         xTaskCreatePinnedToCore(vTask_OBD_Request_1Hz, "OBD_Request_1Hz", 4096, NULL, 1, NULL, 0);
-        // xTaskCreatePinnedToCore(vTask_OBD_Request_10Hz, "OBD_Request_10Hz", 4096, NULL, 1, NULL, 0);
+        xTaskCreatePinnedToCore(vTask_OBD_Request_10Hz, "OBD_Request_10Hz", 4096, NULL, 1, NULL, 0);
         xTaskCreatePinnedToCore(vTask_IMU_Poll_100Hz, "IMU_Poll_100Hz", 4096, NULL, 1, NULL, 0);
 
         break;
@@ -395,11 +416,13 @@ void loop()
                     {
                         if (pid == OBD_1Hz_ID)
                         {
-                            OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 2)) - 1; // increment and wait at -1
+                            OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 1)) - 1; // increment and wait at -1
+                            Serial.println("\t\tReceived: " + OBDSignalToString(OBD_1Hz_ID));
                         }
                         if (pid == OBD_10Hz_ID)
                         {
-                            OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 2)) - 1; // increment and wait at -1
+                            OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 1)) - 1; // increment and wait at -1
+                            Serial.println("\t\tReceived: " + OBDSignalToString(OBD_10Hz_ID));
                         }
                     }
                 }
@@ -407,18 +430,6 @@ void loop()
                 // print to SD card
                 writeCanFrameToSD(log_frame, log_file);
             }
-        }
-
-        // move to next OBD signal request if timeout
-        if (currentTime_us - lastRequestTime_1Hz_us > 100000)
-        {
-            OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 2)) - 1; // increment and wait at -1
-            lastRequestTime_1Hz_us = currentTime_us;
-        }
-        if (currentTime_us - lastRequestTime_10Hz_us > 100000)
-        {
-            OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 2)) - 1; // increment and wait at -1
-            lastRequestTime_10Hz_us = currentTime_us;
         }
 
         // (virtual CAN) GPS
@@ -461,7 +472,7 @@ void loop()
         {
             xQueueReset(canRxQueue);
         }
-        
+
         // close file
         Serial.print("Logging stopped: ");
         Serial.println(log_file.path());

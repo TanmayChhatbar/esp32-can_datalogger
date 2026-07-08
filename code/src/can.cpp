@@ -124,3 +124,31 @@ esp_err_t requestOBDSignal(twai_node_handle_t &bus, OBD_signal signal)
 
     return twai_node_transmit(bus, &frame, pdMS_TO_TICKS(1000));
 }
+
+String OBDSignalToString(OBD_signal signal)
+{
+    switch (signal)
+    {
+        case OBD_ENGINE_LOAD:
+            return "OBD_ENGINE_LOAD";
+        case OBD_COOLANT_TEMP:
+            return "OBD_COOLANT_TEMP";
+        case OBD_INTAKE_AIR_TEMP:
+            return "OBD_INTAKE_AIR_TEMP";
+        case OBD_MAF_FLOW_RATE:
+            return "OBD_MAF_FLOW_RATE";
+        case OBD_ENGINE_RPM:
+            return "OBD_ENGINE_RPM";
+        case OBD_VEHICLE_SPEED:
+            return "OBD_VEHICLE_SPEED";
+        case OBD_THROTTLE_POSITION:
+            return "OBD_THROTTLE_POSITION";
+        case OBD_RUNNING_TIME:
+            return "OBD_RUNNING_TIME";
+        case OBD_FUEL_LEVEL:
+            return "OBD_FUEL_LEVEL";
+        case OBD_ODOMETER:
+            return "OBD_ODOMETER";
+    }
+    return "UNKNOWN_OBD_SIGNAL_0x" + String((uint8_t)signal, HEX);
+}
