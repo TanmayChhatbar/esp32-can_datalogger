@@ -10,8 +10,8 @@ bool setupIMU()
     }
 
     // set range
-    icm.setAccelRange(ICM20948_ACCEL_RANGE_4_G);
-    icm.setGyroRange(ICM20948_GYRO_RANGE_250_DPS);
+    icm.setAccelRange(ICM20948_ACCEL_RANGE_8_G);
+    icm.setGyroRange(ICM20948_GYRO_RANGE_500_DPS);
 
     // frequencies
     icm.setAccelRateDivisor(10);
@@ -53,22 +53,32 @@ bool readIMU(imu_event_t &imu_event)
     // return true;
 }
 
-bool IMUFrameToCanFrame(const imu_event_t &imu_event, log_frame_t &log_frame)
+bool IMUFrameToCanFrame(const imu_event_t &imu_event, log_frame_t imu_frames[2])
 {
-    log_frame.header.id = CANMOD_GPS_GNSS_IMU_FRAME_ID;
-    log_frame.header.ide = CANMOD_GPS_GNSS_IMU_IS_EXTENDED;
-    log_frame.header.dlc = CANMOD_GPS_GNSS_IMU_LENGTH;
-    canmod_gps_gnss_imu_t gps_imu = {
-        .imu_valid = canmod_gps_gnss_imu_imu_valid_encode(1.0f),
-        .acceleration_x = canmod_gps_gnss_imu_acceleration_x_encode(imu_event.accel.acceleration.x),
-        .acceleration_y = canmod_gps_gnss_imu_acceleration_y_encode(imu_event.accel.acceleration.y),
-        .acceleration_z = canmod_gps_gnss_imu_acceleration_z_encode(imu_event.accel.acceleration.z),
-        .angular_rate_x = canmod_gps_gnss_imu_angular_rate_x_encode(imu_event.gyro.gyro.x),
-        .angular_rate_y = canmod_gps_gnss_imu_angular_rate_y_encode(imu_event.gyro.gyro.y),
-        .angular_rate_z = canmod_gps_gnss_imu_angular_rate_z_encode(imu_event.gyro.gyro.z),
+    imu_frames[0].header.id = CAN_IMU_14BIT_IMU_1_FRAME_ID;
+    imu_frames[0].header.ide = CAN_IMU_14BIT_IMU_1_IS_EXTENDED;
+    imu_frames[0].header.dlc = CAN_IMU_14BIT_IMU_1_LENGTH;
+    can_imu_14bit_imu_1_t imu_1 = {
+        .acceleration_x = can_imu_14bit_imu_1_acceleration_x_encode(imu_event.accel.acceleration.x),
+        .acceleration_y = can_imu_14bit_imu_1_acceleration_y_encode(imu_event.accel.acceleration.y),
+        .acceleration_z = can_imu_14bit_imu_1_acceleration_z_encode(imu_event.accel.acceleration.z),
+        .angular_rate_x = can_imu_14bit_imu_1_angular_rate_x_encode(imu_event.gyro.gyro.x),
     };
-    memset(log_frame.data, 0, log_frame.header.dlc);
-    canmod_gps_gnss_imu_pack(log_frame.data, &gps_imu, log_frame.header.dlc);
+    memset(imu_frames[0].data, 0, imu_frames[0].header.dlc);
+    can_imu_14bit_imu_1_pack(imu_frames[0].data, &imu_1, imu_frames[0].header.dlc);
+
+    imu_frames[1].header.id = CAN_IMU_14BIT_IMU_2_FRAME_ID;
+    imu_frames[1].header.ide = CAN_IMU_14BIT_IMU_2_IS_EXTENDED;
+    imu_frames[1].header.dlc = CAN_IMU_14BIT_IMU_2_LENGTH;
+    can_imu_14bit_imu_2_t imu_2 = {
+        .angular_rate_y = can_imu_14bit_imu_2_angular_rate_y_encode(imu_event.gyro.gyro.y),
+        .angular_rate_z = can_imu_14bit_imu_2_angular_rate_z_encode(imu_event.gyro.gyro.z),
+        .mag_x = can_imu_14bit_imu_2_mag_x_encode(imu_event.mag.magnetic.x),
+        .mag_y = can_imu_14bit_imu_2_mag_y_encode(imu_event.mag.magnetic.y),
+        .mag_z = can_imu_14bit_imu_2_mag_z_encode(imu_event.mag.magnetic.z),
+    };
+    memset(imu_frames[1].data, 0, imu_frames[1].header.dlc);
+    can_imu_14bit_imu_2_pack(imu_frames[1].data, &imu_2, imu_frames[1].header.dlc);
 
     return true;
 }

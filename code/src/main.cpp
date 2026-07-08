@@ -156,14 +156,21 @@ void vTask_IMU_Poll_100Hz(void *parameter)
         imu_event_t imu_event = {};
         if (readIMU(imu_event))
         {
-            log_frame_t imu_frame = {};
-            imu_frame.header.timestamp = getEpochMicroseconds();
-            imu_frame.bus_id = 2;
-            if (IMUFrameToCanFrame(imu_event, imu_frame))
+            log_frame_t imu_frames[2] = {};
+            unsigned long long timestamp = getEpochMicroseconds();
+            for (int i = 0; i < 2; i++)
+            {
+                imu_frames[i].header.timestamp = timestamp;
+                imu_frames[i].bus_id = 2;
+            }
+            if (IMUFrameToCanFrame(imu_event, imu_frames))
             {
                 if (canRxQueue != nullptr)
                 {
-                    xQueueSend(canRxQueue, &imu_frame, 0);
+                    for (int i = 0; i < 2; i++)
+                    {
+                        xQueueSend(canRxQueue, &imu_frames[i], 0);
+                    }
                 }
             }
         }

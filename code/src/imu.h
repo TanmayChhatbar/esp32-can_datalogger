@@ -1,7 +1,7 @@
 #pragma once
 #include "pindef.h"
 #include "can.h"
-#include "canmod_gps.h"
+#include "can_imu_14bit.h"
 #include <Adafruit_ICM20X.h>
 #include <Adafruit_ICM20948.h>
 #include <Adafruit_Sensor.h>
@@ -17,4 +17,4 @@ struct imu_event_t
 extern Adafruit_ICM20948 icm;
 bool setupIMU();
 bool readIMU(imu_event_t &imu_event);
-bool IMUFrameToCanFrame(const imu_event_t &imu_event, log_frame_t &log_frame);
+bool IMUFrameToCanFrame(const imu_event_t &imu_event, log_frame_t imu_frames[2]);
