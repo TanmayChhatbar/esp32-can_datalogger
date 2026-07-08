@@ -1,5 +1,5 @@
 #pragma once
-#include "pindef.h"
+#include "defs.h"
 #include "can.h"
 #include "can_imu_14bit.h"
 #include <Adafruit_ICM20X.h>

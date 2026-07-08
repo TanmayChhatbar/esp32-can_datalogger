@@ -1,5 +1,5 @@
 #pragma once
-#include "pindef.h"
+#include "defs.h"
 #include "can.h"
 #include <SPI.h>
 #include <SD.h>

@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <FastLED.h>
-#include "pindef.h"
+#include "defs.h"
 #include "led.h"
 #include "can.h"
 #include "canmod_gps.h"

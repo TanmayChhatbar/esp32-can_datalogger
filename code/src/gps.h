@@ -1,5 +1,5 @@
 #pragma once
-#include "pindef.h"
+#include "defs.h"
 #include <Arduino.h>
 #include <Adafruit_GPS.h>
 #include "can.h"
