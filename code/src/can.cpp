@@ -17,7 +17,7 @@ static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_
     {
         log_frame_t log_frame = {};
         log_frame.header = rx_frame.header;
-        log_frame.header.timestamp = getEpochMicroseconds();
+        log_frame.header.timestamp = esp_timer_get_time() + epoch_offset_us;
         log_frame.bus_id = (uint8_t)(uintptr_t)user_ctx;
 
         // copy data from rx_frame to log_frame

@@ -40,3 +40,4 @@ String OBDSignalToString(OBD_signal signal);
 const uint8_t OBD_SIGCOUNT_1HZ = sizeof(OBD_SIGNALS_OF_INTEREST_1HZ) / sizeof(OBD_signal);
 const uint8_t OBD_SIGCOUNT_10HZ = sizeof(OBD_SIGNALS_OF_INTEREST_10HZ) / sizeof(OBD_signal);
 extern xQueueHandle canRxQueue;
+extern unsigned long long epoch_offset_us;

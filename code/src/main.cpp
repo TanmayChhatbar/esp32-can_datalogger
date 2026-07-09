@@ -20,6 +20,7 @@ volatile OBD_signal OBD_1Hz_ID = OBD_SIGNALS_OF_INTEREST_1HZ[0];   // current OB
 volatile OBD_signal OBD_10Hz_ID = OBD_SIGNALS_OF_INTEREST_10HZ[0]; // current OBD signal for which response is expected, -1 means no signal requested yet for delay between request batches
 volatile unsigned long lastOBDRequestTime_1Hz_us = 0;
 volatile unsigned long lastOBDRequestTime_10Hz_us = 0;
+unsigned long long epoch_offset_us = 0;
 logging_mode_t logging_mode = LOGGING_MODE_WAITGPS;
 bool stopOBDTask_1Hz = false;
 bool stopOBDTask_10Hz = false;
@@ -161,10 +162,10 @@ void vTask_IMU_Poll_100Hz(void *parameter)
         if (readIMU(imu_event))
         {
             log_frame_t imu_frames[2] = {};
-            unsigned long long timestamp = getEpochMicroseconds();
+            unsigned long long timestamp_us = esp_timer_get_time();
             for (int i = 0; i < 2; i++)
             {
-                imu_frames[i].header.timestamp = timestamp;
+                imu_frames[i].header.timestamp = timestamp_us + epoch_offset_us;
                 imu_frames[i].bus_id = 2;
             }
             if (IMUFrameToCanFrame(imu_event, imu_frames))
@@ -329,8 +330,7 @@ void loop()
 {
     // init local vars
     static File log_file;
-    static unsigned long startTime_us = micros();
-    static unsigned long ledTime_ms = millis();
+    static unsigned long led_time_ms = millis();
     static bool wait_gps_print = false;
     static unsigned long wait_gps_start_ms = millis();
 
@@ -399,7 +399,8 @@ void loop()
         logging_mode = LOGGING_MODE_ACTIVE;
 
         // init vars
-        startTime_us = micros() - GPS.milliseconds * 1000; // so that timestamps are relative to the GPS time to the second
+        epoch_offset_us = getEpochMicroseconds() - esp_timer_get_time(); // offset between esp-timer and epoch time at start of logging, so frame-timestamp + epoch_offset_us = epoch time
+        xQueueReset(canRxQueue); // reset queue so no frames are logged with false timestamps
 
         // start OBD request tasks
         xTaskCreatePinnedToCore(vTask_OBD_Request_1Hz, "OBD_Request_1Hz", 4096, NULL, 1, NULL, 0);
@@ -446,11 +447,11 @@ void loop()
         // (virtual CAN) GPS
         if (readGPS())
         {
-            unsigned long long timestamp = getEpochMicroseconds();
+            unsigned long long timestamp_us = esp_timer_get_time();
             log_frame_t gps_frame[4] = {};
             for (int i = 0; i < 4; i++)
             {
-                gps_frame[i].header.timestamp = timestamp;
+                gps_frame[i].header.timestamp = timestamp_us + epoch_offset_us;
                 gps_frame[i].bus_id = 2;
             }
             if (GPSFrameToCanFrame(gps_frame))
@@ -504,9 +505,9 @@ void loop()
     }
 
     // handle LED
-    if (handleLED(logging_mode, millis() - ledTime_ms))
+    if (handleLED(logging_mode, millis() - led_time_ms))
     {
-        ledTime_ms = millis();
+        led_time_ms = millis();
     }
 
     // handle user input
