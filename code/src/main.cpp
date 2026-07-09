@@ -411,7 +411,7 @@ void loop()
 
         if (canRxQueue != nullptr)
         {
-            log_frame_t log_frame;
+            log_frame_t log_frame = {};
             if (xQueueReceive(canRxQueue, &log_frame, 0) == pdTRUE)
             {
                 // OBD response handling
@@ -469,7 +469,7 @@ void loop()
         stopIMUTask_100Hz = true;
 
         // flush can rx queue
-        log_frame_t log_frame;
+        log_frame_t log_frame = {};
         unsigned long flush_time = millis();
         while (xQueueReceive(canRxQueue, &log_frame, 0) == pdTRUE && millis() - flush_time < 1000)
         {
