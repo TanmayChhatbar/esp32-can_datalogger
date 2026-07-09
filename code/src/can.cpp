@@ -111,7 +111,7 @@ bool CanFrameToString(const log_frame_t &log_frame, char *buf, size_t buf_size)
 
 esp_err_t requestOBDSignal(twai_node_handle_t &bus, OBD_signal signal)
 {
-    uint8_t data[8] = {0};
+    static uint8_t data[8] = {0};
     data[0] = 0x02;            // number of additional bytes (Service ID + PID)
     data[1] = 0x01;            // service ID for current data
     data[2] = (uint8_t)signal; // PID for the requested signal
