@@ -25,7 +25,7 @@ bool handleLED(logging_mode_t logging_mode, unsigned long time_since_last_change
             break;
         case LOGGING_MODE_INACTIVE:
             new_color = CRGB::Green;
-            toggle_time = 1e8;
+            toggle_time = -1;
             break;
         case LOGGING_MODE_STOP:
             new_color = CRGB::Red;
@@ -57,7 +57,14 @@ bool handleLED(logging_mode_t logging_mode, unsigned long time_since_last_change
             break;
     }
 
-    // return if LED state was toggled
+    if (toggle_time == -1)
+    {
+        leds[0] = new_color;
+        FastLED.show();
+        return false;
+    }
+
+    // return whether LED state was toggled
     bool toggled = (time_since_last_change > toggle_time);
     if (toggled)
     {
