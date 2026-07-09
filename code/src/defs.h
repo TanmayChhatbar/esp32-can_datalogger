@@ -43,4 +43,7 @@
 // #define BUTS_V4
 
 // settings
-#define PRINT_TO_SERIAL 1
+#define SERIAL_GPS 1
+#define SERIAL_IMU 0
+#define SERIAL_CAN0 1
+#define SERIAL_CAN1 1

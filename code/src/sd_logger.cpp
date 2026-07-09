@@ -17,10 +17,41 @@ bool writeCanFrameToSD(const log_frame_t &log_frame, File &file)
     // write to file
     file.println(buf);
 
-#if PRINT_TO_SERIAL
     // print to serial for printing
-    Serial.println(buf);
+#if !SERIAL_GPS
+    if (log_frame.header.id == CANMOD_GPS_GNSS_STATUS_FRAME_ID ||
+        log_frame.header.id == CANMOD_GPS_GNSS_TIME_FRAME_ID ||
+        log_frame.header.id == CANMOD_GPS_GNSS_POSITION_FRAME_ID ||
+        log_frame.header.id == CANMOD_GPS_GNSS_ALTITUDE_FRAME_ID ||
+        log_frame.header.id == CANMOD_GPS_GNSS_ATTITUDE_FRAME_ID ||
+        log_frame.header.id == CANMOD_GPS_GNSS_ODO_FRAME_ID ||
+        log_frame.header.id == CANMOD_GPS_GNSS_SPEED_FRAME_ID ||
+        log_frame.header.id == CANMOD_GPS_GNSS_GEOFENCE_FRAME_ID ||
+        log_frame.header.id == CANMOD_GPS_GNSS_IMU_FRAME_ID)
+    {
+        return true;
+    }
 #endif
+#if !SERIAL_IMU
+    if (log_frame.header.id == CAN_IMU_14BIT_IMU_1_FRAME_ID ||
+        log_frame.header.id == CAN_IMU_14BIT_IMU_2_FRAME_ID)
+    {
+        return true;
+    }
+#endif
+#if !SERIAL_CAN0
+    if (log_frame.bus_id == 0)
+    {
+        return true;
+    }
+#endif
+#if !SERIAL_CAN1
+    if (log_frame.bus_id == 1)
+    {
+        return true;
+    }
+#endif
+    Serial.println(buf);
     return true;
 }
 
