@@ -69,7 +69,9 @@ void vTask_OBD_Request_1Hz(void *parameter)
                 if (err == ESP_OK)
                 {
                     lastOBDRequestTime_1Hz_us = micros();
+#if SERIAL_OBD_REQUESTS
                     Serial.println("(vT_1Hz)\tRequested: " + OBDSignalToString(OBD_1Hz_ID));
+#endif
                 }
                 else
                 {
@@ -128,7 +130,9 @@ void vTask_OBD_Request_10Hz(void *parameter)
                 if (err == ESP_OK)
                 {
                     lastOBDRequestTime_10Hz_us = micros();
+#if SERIAL_OBD_REQUESTS
                     Serial.println("(vT_10Hz)\tRequested: " + OBDSignalToString(OBD_10Hz_ID));
+#endif
                 }
                 else
                 {
