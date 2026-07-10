@@ -527,4 +527,24 @@ void loop()
     // handle user input
     button_state_t user_input = but1.readButtonState();
     updateLoggingMode(user_input);
+
+    // handle commands over serial
+#if SERIAL_COMMANDS
+    if (Serial.available())
+    {
+        String cmd = Serial.readStringUntil('\n');
+        cmd.trim();
+        if (strcmp(cmd.c_str(), "s") == 0)
+        {
+            if (logging_mode == LOGGING_MODE_INACTIVE)
+            {
+                logging_mode = LOGGING_MODE_START;
+            }
+            else if (logging_mode == LOGGING_MODE_ACTIVE)
+            {
+                logging_mode = LOGGING_MODE_STOP;
+            }
+        }
+    }
+#endif
 }
