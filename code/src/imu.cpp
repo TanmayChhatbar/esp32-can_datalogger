@@ -1,6 +1,7 @@
 #include "imu.h"
 
 Adafruit_ICM20948 icm;
+#define RAD2DEG(x) (x*(180.0 / M_PI))
 
 bool setupIMU()
 {
@@ -59,10 +60,10 @@ bool IMUFrameToCanFrame(const imu_event_t &imu_event, log_frame_t imu_frames[2])
     imu_frames[0].header.ide = CAN_IMU_14BIT_IMU_1_IS_EXTENDED;
     imu_frames[0].header.dlc = CAN_IMU_14BIT_IMU_1_LENGTH;
     can_imu_14bit_imu_1_t imu_1 = {
-        .acceleration_x = can_imu_14bit_imu_1_acceleration_x_encode(imu_event.accel.acceleration.x),
-        .acceleration_y = can_imu_14bit_imu_1_acceleration_y_encode(imu_event.accel.acceleration.y),
-        .acceleration_z = can_imu_14bit_imu_1_acceleration_z_encode(imu_event.accel.acceleration.z),
-        .angular_rate_x = can_imu_14bit_imu_1_angular_rate_x_encode(imu_event.gyro.gyro.x),
+        .acceleration_x = can_imu_14bit_imu_1_acceleration_x_encode(imu_event.accel.acceleration.x / 9.81f),
+        .acceleration_y = can_imu_14bit_imu_1_acceleration_y_encode(imu_event.accel.acceleration.y / 9.81f),
+        .acceleration_z = can_imu_14bit_imu_1_acceleration_z_encode(imu_event.accel.acceleration.z / 9.81f),
+        .angular_rate_x = can_imu_14bit_imu_1_angular_rate_x_encode(RAD2DEG(imu_event.gyro.gyro.x)),
     };
     memset(imu_frames[0].data, 0, imu_frames[0].header.dlc);
     can_imu_14bit_imu_1_pack(imu_frames[0].data, &imu_1, imu_frames[0].header.dlc);
@@ -71,8 +72,8 @@ bool IMUFrameToCanFrame(const imu_event_t &imu_event, log_frame_t imu_frames[2])
     imu_frames[1].header.ide = CAN_IMU_14BIT_IMU_2_IS_EXTENDED;
     imu_frames[1].header.dlc = CAN_IMU_14BIT_IMU_2_LENGTH;
     can_imu_14bit_imu_2_t imu_2 = {
-        .angular_rate_y = can_imu_14bit_imu_2_angular_rate_y_encode(imu_event.gyro.gyro.y),
-        .angular_rate_z = can_imu_14bit_imu_2_angular_rate_z_encode(imu_event.gyro.gyro.z),
+        .angular_rate_y = can_imu_14bit_imu_2_angular_rate_y_encode(RAD2DEG(imu_event.gyro.gyro.y)),
+        .angular_rate_z = can_imu_14bit_imu_2_angular_rate_z_encode(RAD2DEG(imu_event.gyro.gyro.z)),
         .mag_x = can_imu_14bit_imu_2_mag_x_encode(imu_event.mag.magnetic.x),
         .mag_y = can_imu_14bit_imu_2_mag_y_encode(imu_event.mag.magnetic.y),
         .mag_z = can_imu_14bit_imu_2_mag_z_encode(imu_event.mag.magnetic.z),
