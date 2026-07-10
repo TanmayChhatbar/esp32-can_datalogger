@@ -44,7 +44,7 @@
 
 // settings
 #define SERIAL_GPS 1
-#define SERIAL_IMU 0
+#define SERIAL_IMU 1
 #define SERIAL_CAN0 1
 #define SERIAL_CAN1 1
 #define SERIAL_OBD_REQUESTS 0
