@@ -29,11 +29,11 @@ bool handleLED(logging_mode_t logging_mode, unsigned long time_since_last_change
             break;
         case LOGGING_MODE_STOP:
             new_color = CRGB::Red;
-            toggle_time = 150;
+            toggle_time = 50;
             break;
         case LOGGING_MODE_START:
             new_color = CRGB::Red;
-            toggle_time = 150;
+            toggle_time = 50;
             break;
         case LOGGING_MODE_ACTIVE:
             new_color = CRGB::Red;

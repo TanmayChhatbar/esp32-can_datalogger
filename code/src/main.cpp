@@ -21,11 +21,12 @@ volatile OBD_signal OBD_10Hz_ID = OBD_SIGNALS_OF_INTEREST_10HZ[0]; // current OB
 volatile unsigned long lastOBDRequestTime_1Hz_us = 0;
 volatile unsigned long lastOBDRequestTime_10Hz_us = 0;
 unsigned long long epoch_offset_us = 0;
-logging_mode_t logging_mode = LOGGING_MODE_WAITGPS;
-bool stopOBDTask_1Hz = false;
-bool stopOBDTask_10Hz = false;
-bool stopIMUTask_100Hz = false;
+volatile logging_mode_t logging_mode = LOGGING_MODE_WAITGPS;
+volatile bool stopOBDTask_1Hz = false;
+volatile bool stopOBDTask_10Hz = false;
+volatile bool stopIMUTask_100Hz = false;
 Button but1;
+unsigned long led_time_ms = millis();
 
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
@@ -189,6 +190,24 @@ void vTask_IMU_Poll_100Hz(void *parameter)
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 
+void vTask_LED_handler(void *parameter)
+{
+    TickType_t lastWake = xTaskGetTickCount();
+
+    while (true)
+    {
+        lastWake = xTaskGetTickCount();
+        if (handleLED(logging_mode, millis() - led_time_ms))
+        {
+            led_time_ms = millis();
+        }
+        vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(50));
+    }
+}
+
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
 void updateLoggingMode(button_state_t user_input)
 {
     if (user_input == BUTTON_SHORT_PRESS_CONFIRMED)
@@ -254,14 +273,12 @@ void updateLoggingMode(button_state_t user_input)
 
 void setup()
 {
-    while (!Serial.available())
-    {
-        delay(100);
-    }
     Serial.begin(921600);
+    Serial.setTxTimeoutMs(0);
 
     // set up on-board LEDs
     setupLED();
+    xTaskCreatePinnedToCore(vTask_LED_handler, "LED_handler", 2048, NULL, 1, NULL, 0);
 
     // set up buttons
     but1.begin(BUT1, 750, false);
@@ -330,7 +347,6 @@ void loop()
 {
     // init local vars
     static File log_file;
-    static unsigned long led_time_ms = millis();
     static bool wait_gps_print = false;
     static unsigned long wait_gps_start_ms = millis();
 
@@ -400,7 +416,7 @@ void loop()
 
         // init vars
         epoch_offset_us = getEpochMicroseconds() - esp_timer_get_time(); // offset between esp-timer and epoch time at start of logging, so frame-timestamp + epoch_offset_us = epoch time
-        xQueueReset(canRxQueue); // reset queue so no frames are logged with false timestamps
+        xQueueReset(canRxQueue);                                         // reset queue so no frames are logged with false timestamps
 
         // start OBD request tasks
         xTaskCreatePinnedToCore(vTask_OBD_Request_1Hz, "OBD_Request_1Hz", 4096, NULL, 1, NULL, 0);
@@ -429,12 +445,16 @@ void loop()
                         if (pid == OBD_1Hz_ID)
                         {
                             OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 1)) - 1; // increment and wait at -1
+#if SERIAL_OBD_REQUESTS
                             Serial.println("\t\tReceived: " + OBDSignalToString(OBD_1Hz_ID));
+#endif
                         }
                         if (pid == OBD_10Hz_ID)
                         {
                             OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 1)) - 1; // increment and wait at -1
+#if SERIAL_OBD_REQUESTS
                             Serial.println("\t\tReceived: " + OBDSignalToString(OBD_10Hz_ID));
+#endif
                         }
                     }
                 }
@@ -502,12 +522,6 @@ void loop()
     {
         break;
     }
-    }
-
-    // handle LED
-    if (handleLED(logging_mode, millis() - led_time_ms))
-    {
-        led_time_ms = millis();
     }
 
     // handle user input

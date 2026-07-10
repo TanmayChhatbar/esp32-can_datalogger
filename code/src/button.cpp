@@ -6,6 +6,14 @@ bool Button::begin(unsigned int pin_number, unsigned long long_press_timer_ms, b
     _long_press_timer_ms = long_press_timer_ms;
     _state = BUTTON_NOT_PRESSED;
     _is_pulldown = is_pulldown;
+    if (_is_pulldown)
+    {
+        pinMode(_pin_number, INPUT);
+    }
+    else
+    {
+        pinMode(_pin_number, INPUT_PULLUP);
+    }
     _is_initialized = true;
     return true;
 }
