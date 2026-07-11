@@ -21,7 +21,7 @@ volatile OBD_signal OBD_10Hz_ID = OBD_SIGNALS_OF_INTEREST_10HZ[0]; // current OB
 volatile unsigned long lastOBDRequestTime_1Hz_us = 0;
 volatile unsigned long lastOBDRequestTime_10Hz_us = 0;
 unsigned long long epoch_offset_us = 0;
-volatile logging_mode_t logging_mode = LOGGING_MODE_WAITGPS;
+volatile logging_mode_t logging_mode = LOGGING_MODE_SETUP;
 volatile bool stopOBDTask_1Hz = false;
 volatile bool stopOBDTask_10Hz = false;
 volatile bool stopIMUTask_100Hz = false;
@@ -285,6 +285,7 @@ void setup()
 
     // set up GPS
     Serial.println("GPS");
+    delay(2000);
     if (!setupGPS())
     {
         Serial.println("\tFailed to initialize");
@@ -338,6 +339,8 @@ void setup()
         Serial.printf("\tFailed: %s\n", esp_err_to_name(err));
     else
         Serial.println("\tInitialized");
+
+    logging_mode = LOGGING_MODE_WAITGPS;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -349,6 +352,8 @@ void loop()
     static File log_file;
     static bool wait_gps_print = false;
     static unsigned long wait_gps_start_ms = millis();
+    static bool last_gps_fix_state = false;
+    static bool gps_fix_var = true;
 
     // logging actions
     switch (logging_mode)
@@ -362,19 +367,23 @@ void loop()
             wait_gps_print = true;
             wait_gps_start_ms = millis();
         }
-        if (millis() - wait_gps_start_ms > 1000)
-        {
-            Serial.print('.');
-            wait_gps_start_ms = millis();
-        }
-
-        readGPS();
-
-        if (GPS.fix)
+        if (millis() - wait_gps_start_ms > 1200)
         {
             Serial.println("\tFix acquired");
+            vTaskDelay(pdMS_TO_TICKS(100));
+            while (!readGPS())
+            {
+                vTaskDelay(pdMS_TO_TICKS(50));
+            }
             logging_mode = LOGGING_MODE_INACTIVE;
             syncTimeFromGPS();
+        }
+
+        gps_fix_var = digitalRead(GPS_FIX);
+        if (gps_fix_var != last_gps_fix_state)
+        {
+            last_gps_fix_state = gps_fix_var;
+            wait_gps_start_ms = millis();
         }
         break;
     }

@@ -19,6 +19,10 @@ bool handleLED(logging_mode_t logging_mode, unsigned long time_since_last_change
     CRGB new_color = CRGB::Black;
     switch (logging_mode)
     {
+        case LOGGING_MODE_SETUP:
+            new_color = CRGB::Yellow;
+            toggle_time = 80;
+            break;
         case LOGGING_MODE_WAITGPS:
             new_color = CRGB::Magenta;
             toggle_time = 1000;

@@ -8,6 +8,7 @@
 
 enum logging_mode_t
 {
+    LOGGING_MODE_SETUP = -2,
     LOGGING_MODE_WAITGPS = -1,
     LOGGING_MODE_INACTIVE = 0,
     LOGGING_MODE_STOP = 1,

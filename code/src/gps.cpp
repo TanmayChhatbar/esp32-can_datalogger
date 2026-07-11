@@ -13,8 +13,8 @@ bool setupGPS()
 
     // change baud to 115200
     GPS.sendCommand(PMTK_SET_BAUD_115200);
-    delay(100);
-    GPSSerial.begin(115200, SERIAL_8N1, GPS_RX, GPS_TX);
+    delay(250);
+    GPSSerial.updateBaudRate(115200);
     if (!GPS.begin(115200))
     {
         return false;
@@ -24,8 +24,17 @@ bool setupGPS()
     // config
     GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
     GPS.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ);
+    GPSSerial.flush();
 
-    return true;
+    uint32_t start = millis();
+    while (millis() - start < 3000)
+    {
+        if (readGPS())
+            return true;
+        delay(10);
+    }
+
+    return false;
 }
 
 bool readGPS()
