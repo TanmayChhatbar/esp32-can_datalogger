@@ -271,6 +271,50 @@ void updateLoggingMode(button_state_t user_input)
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 
+String esp_reset_reason_to_name(esp_reset_reason_t reason)
+{
+    switch (reason)
+    {
+    case ESP_RST_UNKNOWN:
+        return "ESP_RST_UNKNOWN";
+    case ESP_RST_POWERON:
+        return "ESP_RST_POWERON";
+    case ESP_RST_EXT:
+        return "ESP_RST_EXT";
+    case ESP_RST_SW:
+        return "ESP_RST_SW";
+    case ESP_RST_PANIC:
+        return "ESP_RST_PANIC";
+    case ESP_RST_INT_WDT:
+        return "ESP_RST_INT_WDT";
+    case ESP_RST_TASK_WDT:
+        return "ESP_RST_TASK_WDT";
+    case ESP_RST_WDT:
+        return "ESP_RST_WDT";
+    case ESP_RST_DEEPSLEEP:
+        return "ESP_RST_DEEPSLEEP";
+    case ESP_RST_BROWNOUT:
+        return "ESP_RST_BROWNOUT";
+    case ESP_RST_SDIO:
+        return "ESP_RST_SDIO";
+    case ESP_RST_USB:
+        return "ESP_RST_USB";
+    case ESP_RST_JTAG:
+        return "ESP_RST_JTAG";
+    case ESP_RST_EFUSE:
+        return "ESP_RST_EFUSE";
+    case ESP_RST_PWR_GLITCH:
+        return "ESP_RST_PWR_GLITCH";
+    case ESP_RST_CPU_LOCKUP:
+        return "ESP_RST_CPU_LOCKUP";
+    default:
+        return "Unknown reset reason";
+    }
+}
+
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
 void setup()
 {
     Serial.begin(921600);
@@ -340,6 +384,19 @@ void setup()
     else
         Serial.println("\tInitialized");
 
+    // log crash reason
+    // TODO string eg. "Reset reason: ESP_RST_POWERON"
+    esp_reset_reason_t reason = esp_reset_reason();
+    SD.mkdir("/crash_logs");
+    File crash_log = SD.open("/crash_logs/crash_log.txt", FILE_APPEND);
+    if (crash_log)
+    {
+        crash_log.printf("Reset reason: ");
+        crash_log.println(esp_reset_reason_to_name(reason));
+        crash_log.close();
+    }
+    
+    // move to wait for GPS fix
     logging_mode = LOGGING_MODE_WAITGPS;
 }
 
