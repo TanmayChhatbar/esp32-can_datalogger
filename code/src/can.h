@@ -30,7 +30,7 @@ struct log_frame_t
 #define OBD_TX_LEN 10
 #define CAN_RX_QUEUE_LEN 256
 
-const OBD_signal OBD_SIGNALS_OF_INTEREST_1HZ[] = {OBD_FUEL_LEVEL, OBD_RUNNING_TIME, OBD_ODOMETER};
+const OBD_signal OBD_SIGNALS_OF_INTEREST_1HZ[] = {OBD_ODOMETER};
 const OBD_signal OBD_SIGNALS_OF_INTEREST_10HZ[] = {OBD_ENGINE_LOAD, OBD_VEHICLE_SPEED};
 
 esp_err_t setupCAN(twai_node_handle_t &bus, uint8_t controllerId, uint8_t sxPin, uint8_t txPin, uint8_t rxPin);
