@@ -6,3 +6,4 @@
 
 void setupLED();
 bool handleLED(logging_mode_t logging_mode, unsigned long time_since_last_change);
+void overrideLED(CRGB color);

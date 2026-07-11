@@ -12,6 +12,11 @@ void setupLED()
     FastLED.show();
 }
 
+void overrideLED(CRGB color)
+{
+    leds[0] = color;
+    FastLED.show();
+}
 
 bool handleLED(logging_mode_t logging_mode, unsigned long time_since_last_change)
 {

@@ -461,6 +461,7 @@ void loop()
                         if (pid == OBD_10Hz_ID)
                         {
                             OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 1)) - 1; // increment and wait at -1
+                            overrideLED(CRGB::Orange);
 #if SERIAL_OBD_REQUESTS
                             Serial.println("\t\tReceived: " + OBDSignalToString(OBD_10Hz_ID));
 #endif
