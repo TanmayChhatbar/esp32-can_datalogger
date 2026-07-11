@@ -5,6 +5,8 @@ import zmq
 import json
 import serial
 
+start_requested = 0
+
 class gvret_frame:
     timestamp: int
     id: int
@@ -31,7 +33,10 @@ def setupZMQSocket():
     return context, socket
 
 def initSerial():
-    ser = serial.Serial(port="COM4", baudrate=921600, timeout=1)
+    try:
+        ser = serial.Serial(port="COM4", baudrate=921600, timeout=1)
+    except:
+        ser = serial.Serial(port="/dev/ttyACM0", baudrate=921600, timeout=1)
     return ser
 
 def readGVRETFromSerial(ser):
@@ -57,7 +62,9 @@ def readGVRETFromSerial(ser):
         if "Logging stopped" in l:
             return "Stopped"
     else:
-        ser.write(b"s\n")
+        if start_requested == 0:
+            ser.write(b"s\n")
+        start_requested = 1
         return "Start requested"
     
 def main():
