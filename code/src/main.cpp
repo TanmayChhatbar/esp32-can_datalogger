@@ -330,6 +330,7 @@ void setup()
     // set up GPS
     Serial.println("GPS");
     delay(2000);
+
     while (!setupGPS())
     {
         Serial.println("\tFailed to initialize");
@@ -429,8 +430,16 @@ void loop()
             {
                 vTaskDelay(pdMS_TO_TICKS(50));
             }
-            logging_mode = LOGGING_MODE_INACTIVE;
-            syncTimeFromGPS();
+            if (GPS.year > 25 && GPS.year < 30)
+            {
+                syncTimeFromGPS();
+                logging_mode = LOGGING_MODE_INACTIVE;
+            }
+            else
+            {
+                Serial.println("\tGPS time invalid, resetting");
+                esp_restart();
+            }
         }
 
         gps_fix_var = digitalRead(GPS_FIX);
