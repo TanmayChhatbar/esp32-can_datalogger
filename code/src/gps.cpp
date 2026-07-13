@@ -15,23 +15,21 @@ bool setupGPS()
     GPS.sendCommand(PMTK_SET_BAUD_115200);
     delay(250);
     GPSSerial.updateBaudRate(115200);
-    if (!GPS.begin(115200))
-    {
-        return false;
-    }
+    GPS.begin(115200);
     delay(100);
 
     // config
     GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
     GPS.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ);
-    GPSSerial.flush();
+    delay(50);
 
-    uint32_t start = millis();
+    unsigned long start = millis();
     while (millis() - start < 3000)
     {
-        if (readGPS())
-            return true;
-        delay(10);
+        while (GPS.available())
+            GPS.read();
+        if (GPS.newNMEAreceived())
+            return GPS.parse(GPS.lastNMEA());
     }
 
     return false;
@@ -40,8 +38,14 @@ bool setupGPS()
 bool readGPS()
 {
     while (GPS.available())
+    {
         GPS.read();
-    return GPS.newNMEAreceived() && GPS.parse(GPS.lastNMEA());
+    }
+    if (GPS.newNMEAreceived())
+    {
+        return GPS.parse(GPS.lastNMEA());
+    }
+    return false;
 }
 
 void syncTimeFromGPS()
@@ -77,8 +81,7 @@ bool GPSFrameToCanFrame(log_frame_t log_frame[4])
         .position_valid = canmod_gps_gnss_position_position_valid_encode(GPS.fix),
         .latitude = canmod_gps_gnss_position_latitude_encode(GPS.latitudeDegrees),
         .longitude = canmod_gps_gnss_position_longitude_encode(GPS.longitudeDegrees),
-        .position_accuracy = canmod_gps_gnss_position_position_accuracy_encode(GPS.fixquality)
-    };
+        .position_accuracy = canmod_gps_gnss_position_position_accuracy_encode(GPS.fixquality)};
     memset(log_frame[0].data, 0, log_frame[0].header.dlc);
     canmod_gps_gnss_position_pack(log_frame[0].data, &gps_position, log_frame[0].header.dlc);
 

@@ -330,13 +330,10 @@ void setup()
     // set up GPS
     Serial.println("GPS");
     delay(2000);
-    if (!setupGPS())
+    while (!setupGPS())
     {
         Serial.println("\tFailed to initialize");
-        while (1)
-        {
-            delay(1000);
-        }
+        delay(1000);
     }
     Serial.println("\tInitialized");
 
@@ -395,7 +392,7 @@ void setup()
         crash_log.println(esp_reset_reason_to_name(reason));
         crash_log.close();
     }
-    
+
     // move to wait for GPS fix
     logging_mode = LOGGING_MODE_WAITGPS;
 }
