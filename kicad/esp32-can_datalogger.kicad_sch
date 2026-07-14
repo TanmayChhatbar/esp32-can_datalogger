@@ -8512,16 +8512,6 @@
 	)
 	(wire
 		(pts
-			(xy 41.91 73.66) (xy 41.91 76.2)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5c832404-5f48-457d-91be-e5c8e1c1ee97")
-	)
-	(wire
-		(pts
 			(xy 139.7 114.3) (xy 147.32 114.3)
 		)
 		(stroke
@@ -10622,30 +10612,6 @@
 			)
 		)
 	)
-	(global_label "BUT1"
-		(shape input)
-		(at 41.91 76.2 270)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "e5367af8-e0fb-4689-a699-6ce77f79aef7")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 41.91 83.9628 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
 	(global_label "ACC_INT"
 		(shape input)
 		(at 279.4 105.41 180)
@@ -11348,7 +11314,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_USB:USB_C_Receptacle_GCT_USB4110"
+		(property "Footprint" "esp32-can_datalogger:USB_C_Receptacle_GCT_USB4110-grounded shield"
 			(at 151.13 91.44 0)
 			(hide yes)
 			(show_name no)
@@ -11474,7 +11440,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_USB:USB_C_Receptacle_GCT_USB4110"
+		(property "Footprint" "esp32-can_datalogger:USB_C_Receptacle_GCT_USB4110-grounded shield"
 			(at 151.13 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -14096,7 +14062,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_USB:USB_C_Receptacle_GCT_USB4110"
+		(property "Footprint" "esp32-can_datalogger:USB_C_Receptacle_GCT_USB4110-grounded shield"
 			(at 101.6 91.44 0)
 			(hide yes)
 			(show_name no)
@@ -14859,7 +14825,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_USB:USB_C_Receptacle_GCT_USB4110"
+		(property "Footprint" "esp32-can_datalogger:USB_C_Receptacle_GCT_USB4110-grounded shield"
 			(at 101.6 38.1 0)
 			(hide yes)
 			(show_name no)
