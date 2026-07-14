@@ -43,8 +43,11 @@ esp_err_t setupCAN(twai_node_handle_t &bus,
             return ESP_ERR_NO_MEM;
         }
     }
-    pinMode(sxPin, OUTPUT);
-    digitalWrite(sxPin, LOW);
+    if (sxPin != (uint8_t)-1)
+    {
+        pinMode(sxPin, OUTPUT);
+        digitalWrite(sxPin, LOW);
+    }
 
     twai_onchip_node_config_t cfg =
         {
