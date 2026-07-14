@@ -7366,7 +7366,7 @@
 		(uuid "666c6e67-8ea5-4e8b-8470-80112bdeb2bb")
 	)
 	(rectangle
-		(start 81.28 -41.91)
+		(start 81.28 12.7)
 		(end 185.42 121.92)
 		(stroke
 			(width 0)
@@ -7634,6 +7634,12 @@
 		(uuid "a265ae12-8979-4516-b2b4-c24673d62052")
 	)
 	(junction
+		(at 114.3 180.34)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a864c155-95e6-4393-b29d-3179b9deae2e")
+	)
+	(junction
 		(at 246.38 95.25)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -7855,13 +7861,23 @@
 	)
 	(wire
 		(pts
-			(xy 100.33 185.42) (xy 111.76 185.42)
+			(xy 100.33 185.42) (xy 110.49 185.42)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "06bbd950-f1cb-4704-a77f-f907e3f4ed70")
+	)
+	(wire
+		(pts
+			(xy 114.3 179.07) (xy 114.3 180.34)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "089550be-847c-450c-a006-7fbcf45a0e47")
 	)
 	(wire
 		(pts
@@ -8705,6 +8721,16 @@
 	)
 	(wire
 		(pts
+			(xy 114.3 180.34) (xy 110.49 180.34)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "87066aaa-a611-4ada-8068-d609d4712d81")
+	)
+	(wire
+		(pts
 			(xy 22.86 43.18) (xy 25.4 43.18)
 		)
 		(stroke
@@ -9102,6 +9128,16 @@
 			(type default)
 		)
 		(uuid "c7d5ccdd-5e76-4a46-a3f7-9c1ba01d52b2")
+	)
+	(wire
+		(pts
+			(xy 110.49 180.34) (xy 110.49 185.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c9558f0a-7560-479f-a05d-27229537b859")
 	)
 	(wire
 		(pts
@@ -12451,7 +12487,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder"
 			(at 53.0352 -8.89 0)
 			(hide yes)
 			(show_name no)
@@ -12494,6 +12530,188 @@
 			(project "esp32-can_datalogger"
 				(path "/27d88dad-6a90-4f6f-a0dd-ec7ff61f0111"
 					(reference "C5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 114.3 187.96 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "41922379-1e63-4cba-b59c-06381da075af")
+		(property "Reference" "#PWR045"
+			(at 114.3 194.31 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 116.84 189.2299 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 114.3 187.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 114.3 187.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 114.3 187.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "906d6567-b4eb-46d5-a363-db3c1d595a9c")
+		)
+		(instances
+			(project "esp32-can_datalogger"
+				(path "/27d88dad-6a90-4f6f-a0dd-ec7ff61f0111"
+					(reference "#PWR045")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 114.3 184.15 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "426d3477-92f4-4b72-9ad0-077e0688f5bd")
+		(property "Reference" "C15"
+			(at 110.49 185.4201 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "0.1uF"
+			(at 110.49 182.8801 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric_Pad0.74x0.62mm_HandSolder"
+			(at 113.3348 180.34 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 114.3 184.15 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 114.3 184.15 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Device" ""
+			(at 114.3 184.15 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Pins" ""
+			(at 114.3 184.15 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "05190ee8-3529-4c8d-b7d8-2d2571d18a03")
+		)
+		(pin "1"
+			(uuid "273cf4d1-8cae-49a0-94b0-07a2950eed38")
+		)
+		(instances
+			(project "esp32-can_datalogger"
+				(path "/27d88dad-6a90-4f6f-a0dd-ec7ff61f0111"
+					(reference "C15")
 					(unit 1)
 				)
 			)
@@ -13085,7 +13303,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric_Pad0.74x0.62mm_HandSolder"
 			(at 319.0748 102.87 0)
 			(hide yes)
 			(show_name no)
@@ -13581,7 +13799,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder"
 			(at 27.6352 -8.89 0)
 			(hide yes)
 			(show_name no)
@@ -16050,7 +16268,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric_Pad0.74x0.62mm_HandSolder"
 			(at 200.9648 95.25 0)
 			(hide yes)
 			(show_name no)
@@ -16301,7 +16519,7 @@
 	)
 	(symbol
 		(lib_id "power:+3V3")
-		(at 111.76 185.42 0)
+		(at 114.3 179.07 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -16312,7 +16530,7 @@
 		(fields_autoplaced yes)
 		(uuid "c454d76f-7697-4e08-893b-acd585437c8d")
 		(property "Reference" "#PWR043"
-			(at 111.76 189.23 0)
+			(at 114.3 182.88 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16323,7 +16541,7 @@
 			)
 		)
 		(property "Value" "+3.3V"
-			(at 111.76 180.34 0)
+			(at 114.3 173.99 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -16333,7 +16551,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 111.76 185.42 0)
+			(at 114.3 179.07 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16344,7 +16562,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 111.76 185.42 0)
+			(at 114.3 179.07 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16355,7 +16573,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 111.76 185.42 0)
+			(at 114.3 179.07 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17002,7 +17220,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric_Pad0.74x0.62mm_HandSolder"
 			(at 317.8048 80.01 0)
 			(hide yes)
 			(show_name no)
@@ -17399,7 +17617,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric_Pad0.74x0.62mm_HandSolder"
 			(at 282.2448 80.01 0)
 			(hide yes)
 			(show_name no)
@@ -17903,7 +18121,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric_Pad0.74x0.62mm_HandSolder"
 			(at 257.81 94.2848 0)
 			(hide yes)
 			(show_name no)
@@ -18321,7 +18539,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric_Pad0.74x0.62mm_HandSolder"
 			(at 207.01 29.5148 0)
 			(hide yes)
 			(show_name no)
