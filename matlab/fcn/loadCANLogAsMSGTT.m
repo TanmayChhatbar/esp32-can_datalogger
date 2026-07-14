@@ -1,4 +1,4 @@
-function msg_tt = loadCANLogAsMSGTT(ffn, dbc_files)
+function [msg_tt, db] = loadCANLogAsMSGTT(ffn, dbc_files)
 
 % load can database(s)
 db = canDatabase(dbc_files(1));
@@ -10,7 +10,8 @@ opts = detectImportOptions(ffn, 'NumHeaderLines',0);
 opts = setvartype(opts, opts.VariableNames, "char");
 opts = setvartype(opts, "TimeStamp", 'double');
 opts = setvartype(opts, "ID", 'uint32');
-opts = setvartype(opts, ["Bus", "LEN", "ID"], 'double');
+opts = setvartype(opts, ["Bus", "LEN"], 'double');
+opts = setvartype(opts, ["ID"], 'char');
 warning off
 data = readtable(ffn, opts, "ReadVariableNames", true);
 warning on
@@ -23,7 +24,8 @@ data = renamevars(data, 'LEN', 'Length');
 % convert
 data.Extended = data.Extended == "true";
 data.Remote = data.Remote == "Rx";
-data.Error = data.Extended & false; % assume no error frame
+data.Error = data.Extended & false; % assume no error frame\
+data.ID = hex2dec(data.ID);
 data.D1 = hex2dec(data.D1);
 data.D2 = hex2dec(data.D2);
 data.D3 = hex2dec(data.D3);
