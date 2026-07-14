@@ -3,3 +3,4 @@ esp32-can_datalogger-backups/*
 *.SLDASM
 *.lck
 export/*
+.history
