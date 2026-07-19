@@ -210,61 +210,74 @@ void vTask_LED_handler(void *parameter)
 
 void updateLoggingMode(button_state_t user_input)
 {
-    if (user_input == BUTTON_SHORT_PRESS_CONFIRMED)
+    button_press_t state = user_input.state;
+    int button_index = user_input.button_index;
+    if (button_index == -1)
     {
-        switch (logging_mode)
+        return;
+    }
+    else if (button_index == 0)
+    {
+        if (state == BUTTON_SHORT_PRESS_CONFIRMED)
         {
-        case LOGGING_MODE_INACTIVE:
-        {
-            logging_mode = LOGGING_MODE_START;
-            break;
-        }
+            switch (logging_mode)
+            {
+            case LOGGING_MODE_INACTIVE:
+            {
+                logging_mode = LOGGING_MODE_START;
+                break;
+            }
 
-        case LOGGING_MODE_ACTIVE:
-        {
-            logging_mode = LOGGING_MODE_STOP;
-            break;
+            case LOGGING_MODE_ACTIVE:
+            {
+                logging_mode = LOGGING_MODE_STOP;
+                break;
+            }
+            case LOGGING_MODE_WAITGPS:
+            case LOGGING_MODE_STOP:
+            case LOGGING_MODE_START:
+            case LOGGING_MODE_WIFI_ACTIVE:
+            case LOGGING_MODE_WIFI_STOP:
+            default:
+            {
+                break;
+            }
+            }
         }
-        case LOGGING_MODE_WAITGPS:
-        case LOGGING_MODE_STOP:
-        case LOGGING_MODE_START:
-        case LOGGING_MODE_WIFI_ACTIVE:
-        case LOGGING_MODE_WIFI_STOP:
-        default:
+        else if (button_index == BUTTON_LONG_PRESS_CONFIRMED)
         {
-            break;
-        }
+            switch (logging_mode)
+            {
+            case LOGGING_MODE_WAITGPS:
+            {
+                Serial.println("Overriding GPS wait");
+                logging_mode = LOGGING_MODE_INACTIVE;
+                break;
+            }
+            case LOGGING_MODE_INACTIVE:
+            {
+                logging_mode = LOGGING_MODE_WIFI_START;
+                break;
+            }
+            case LOGGING_MODE_WIFI_ACTIVE:
+            {
+                logging_mode = LOGGING_MODE_WIFI_STOP;
+                break;
+            }
+            case LOGGING_MODE_WIFI_STOP:
+            case LOGGING_MODE_START:
+            case LOGGING_MODE_ACTIVE:
+            case LOGGING_MODE_STOP:
+            default:
+            {
+                break;
+            }
+            }
         }
     }
-    else if (user_input == BUTTON_LONG_PRESS_CONFIRMED)
+    else if (button_index == 1)
     {
-        switch (logging_mode)
-        {
-        case LOGGING_MODE_WAITGPS:
-        {
-            Serial.println("Overriding GPS wait");
-            logging_mode = LOGGING_MODE_INACTIVE;
-            break;
-        }
-        case LOGGING_MODE_INACTIVE:
-        {
-            logging_mode = LOGGING_MODE_WIFI_START;
-            break;
-        }
-        case LOGGING_MODE_WIFI_ACTIVE:
-        {
-            logging_mode = LOGGING_MODE_WIFI_STOP;
-            break;
-        }
-        case LOGGING_MODE_WIFI_STOP:
-        case LOGGING_MODE_START:
-        case LOGGING_MODE_ACTIVE:
-        case LOGGING_MODE_STOP:
-        default:
-        {
-            break;
-        }
-        }
+        // TODO handle button 2
     }
 }
 
