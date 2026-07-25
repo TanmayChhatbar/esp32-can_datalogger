@@ -12,22 +12,33 @@ bool setupGPS()
     }
 
     // change baud to 115200
+    delay(250);
     GPS.sendCommand(PMTK_SET_BAUD_115200);
     delay(250);
-    GPSSerial.updateBaudRate(115200);
+    GPSSerial.end();
+    delay(250);
+    GPSSerial.begin(115200, SERIAL_8N1, GPS_RX, GPS_TX);
+    delay(250);
     GPS.begin(115200);
     delay(100);
 
     // config
     GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
+    delay(50);
     GPS.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ);
+    delay(50);
+    GPS.sendCommand(PGCMD_ANTENNA);
     delay(50);
 
     unsigned long start = millis();
     while (millis() - start < 3000)
     {
         while (GPS.available())
-            GPS.read();
+        {
+            char c = GPS.read();
+            // Serial.write(c);
+        }
+        // Serial.println("");
         if (GPS.newNMEAreceived())
             return GPS.parse(GPS.lastNMEA());
     }
@@ -39,7 +50,8 @@ bool readGPS()
 {
     while (GPS.available())
     {
-        GPS.read();
+        char c = GPS.read();
+        // Serial.write(c);
     }
     if (GPS.newNMEAreceived())
     {

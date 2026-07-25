@@ -437,8 +437,8 @@ void loop()
             }
             else
             {
-                Serial.println("\tGPS time invalid, resetting");
-                esp_restart();
+                Serial.println("\tGPS time invalid (" + String(GPS.year) + ")");
+                // esp_restart();
             }
         }
 

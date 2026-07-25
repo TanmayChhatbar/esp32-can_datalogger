@@ -5,8 +5,6 @@ import zmq
 import json
 import serial
 
-start_requested = 0
-
 class gvret_frame:
     timestamp: int
     id: int
@@ -45,6 +43,7 @@ def readGVRETFromSerial(ser):
         ser.open()
 
     # if no data back, send string "s" to start
+    start_requested = 0
     l = ser.readline().decode("utf-8").strip()
     print(l)
     if l != "":
