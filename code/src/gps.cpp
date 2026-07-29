@@ -6,10 +6,6 @@ bool setupGPS()
 {
     // begin at 9600 baud
     GPSSerial.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
-    if (!GPS.begin(9600))
-    {
-        return false;
-    }
 
     // change baud to 115200
     delay(250);

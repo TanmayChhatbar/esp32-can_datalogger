@@ -580,11 +580,14 @@ void loop()
         }
 
         // close file
-        Serial.print("Logging stopped: ");
-        Serial.println(log_file.path());
         log_file.flush();
+        size_t log_file_size = log_file.size();
+        Serial.print("Logging stopped:\t");
+        Serial.print(log_file.path());
+        Serial.print("\t(");
+        Serial.print(log_file_size);
+        Serial.println(" bytes)");
         log_file.close();
-
         logging_mode = LOGGING_MODE_INACTIVE;
         break;
     }

@@ -15,7 +15,14 @@ bool writeCanFrameToSD(const log_frame_t &log_frame, File &file)
     CanFrameToString(log_frame, buf, sizeof(buf));
 
     // write to file
-    file.println(buf);
+    size_t written = file.println(buf);
+    
+    if (written != strlen(buf) + 2)
+    {
+        Serial.printf("Error writing to SD card: %d bytes written, expected %d\n", written, strlen(buf) + 2);
+        Serial.printf("(%d bytes)\n", file.size());
+        return false;
+    }
 
     // print to serial for printing
 #if SERIAL_PRINT_CAN
