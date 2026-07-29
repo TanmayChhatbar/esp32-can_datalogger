@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "defs.h"
 
 enum button_press_t
 {
@@ -19,7 +20,7 @@ typedef struct
 class Button
 {
 public:
-    bool begin(unsigned int pin_number, unsigned long long_press_timer_ms, int num_buttons);
+    bool begin(unsigned int pin_number, unsigned long long_press_timer_ms, int num_buttons, const float *voltages);
     button_state_t readButtonState();
 
 private:

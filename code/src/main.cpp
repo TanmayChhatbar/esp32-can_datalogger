@@ -338,7 +338,7 @@ void setup()
     xTaskCreatePinnedToCore(vTask_LED_handler, "LED_handler", 2048, NULL, 1, NULL, 0);
 
     // set up buttons TODO multi button
-    but1.begin(BUT1, 750, false);
+    but1.begin(BUTS, 750, NUMBUTS, BUTS_V);
 
     // set up GPS
     Serial.println("GPS");

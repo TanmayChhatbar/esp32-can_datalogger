@@ -2,7 +2,8 @@
 
 bool Button::begin(unsigned int pin_number,
                    unsigned long long_press_timer_ms,
-                   int num_buttons)
+                   int num_buttons,
+                   const float *voltages)
 {
     _pin_number = pin_number;
     _long_press_timer_ms = long_press_timer_ms;
@@ -11,7 +12,7 @@ bool Button::begin(unsigned int pin_number,
     _voltages = new float[num_buttons];
     for (int i = 0; i < num_buttons; i++)
     {
-        _voltages[i] = 3.3f * (float)(i) / (float)(num_buttons);
+        _voltages[i] = voltages[i];
     }
     _is_initialized = true;
 
@@ -31,7 +32,7 @@ button_state_t Button::readButtonState()
     float current_voltage = v_tmp; // TODO filtering
     // find voltage close in _voltages array
     int button_index_tmp = -1;
-    for (unsigned int i = 0; i < sizeof(_voltages) / sizeof(_voltages[0]); i++)
+    for (unsigned int i = 0; i < NUMBUTS; i++)
     {
         if (fabs(current_voltage - _voltages[i]) < 0.1f)
         {
