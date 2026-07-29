@@ -4,7 +4,7 @@ clc
 addpath("fcn")
 
 %% log file
-ffn = "../logs/YamahaR7_2080-01-05_18-59-51.log";
+ffn = "../logs/YamahaR7_2026-07-26_16-53-49.log";
 dbc_files = ["../dbc/can-imu-14bit.dbc", ...
     "../dbc/canmod-gps.dbc", ...
     "../dbc/OBD-v4.3.dbc", ...
@@ -16,29 +16,30 @@ dbc_files = ["../dbc/can-imu-14bit.dbc", ...
 sg_tt = canSignalTimetable(msg_tt);
 return
 %% plot
-if isfield(sg_tt, 'GnssImu')
+if isfield(sg_tt, 'Imu_1')
     figure('Name', 'IMU')
-    subplot(211)
-    plot(sg_tt.GnssImu.Time, sg_tt.GnssImu.AccelerationX, 'r')
+    s(1) = subplot(211);
+    plot(sg_tt.Imu_1.Time, sg_tt.Imu_1.AccelerationX, 'r')
     hold on
-    plot(sg_tt.GnssImu.Time, sg_tt.GnssImu.AccelerationY, 'g')
-    plot(sg_tt.GnssImu.Time, sg_tt.GnssImu.AccelerationZ, 'b')
+    plot(sg_tt.Imu_1.Time, sg_tt.Imu_1.AccelerationY, 'g')
+    plot(sg_tt.Imu_1.Time, sg_tt.Imu_1.AccelerationZ, 'b')
     hold off
     xlabel("Time [s]")
     ylabel("Acceleration [m/s^2]")
     grid on
     
-    subplot(212)
-    plot(sg_tt.GnssImu.Time, sg_tt.GnssImu.AngularRateX, 'r')
+    s(2) = subplot(212);
+    plot(sg_tt.Imu_1.Time, sg_tt.Imu_1.AngularRateX, 'r')
     hold on
-    plot(sg_tt.GnssImu.Time, sg_tt.GnssImu.AngularRateY, 'g')
-    plot(sg_tt.GnssImu.Time, sg_tt.GnssImu.AngularRateZ, 'b')
+    plot(sg_tt.Imu_2.Time, sg_tt.Imu_2.AngularRateY, 'g')
+    plot(sg_tt.Imu_2.Time, sg_tt.Imu_2.AngularRateZ, 'b')
     hold off
     xlabel("Time [s]")
     ylabel("Angular rate [deg/s]")
     grid on
     
     fontsize(20, 'points')
+    linkaxes(s, 'x')
 end
 if isfield(sg_tt, 'GnssPosition')
     figure('Name', 'GPS')
