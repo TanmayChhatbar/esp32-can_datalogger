@@ -372,10 +372,26 @@ void setup()
     while (digitalRead(SD_CD))
     {
         Serial.println("\tWaiting for SD card...");
+        button_state_t state = but1.readButtonState();
+        if (state.button_index == 0 && state.state == BUTTON_LONG_PRESS_CONFIRMED)
+        {
+            Serial.println("\tOverriding SD card detection");
+            break;
+        }
         delay(1000);
     }
     while (!SD.begin(SPI_CS_SD, SPI, 40000000))
     {
+        button_state_t state = but1.readButtonState();
+        if (state.button_index == 0 && state.state == BUTTON_LONG_PRESS_CONFIRMED)
+        {
+            Serial.println("\tOverriding SD card detection");
+            break;
+        }
+        if (state.button_index == 0 && state.state == BUTTON_LONG_PRESS_CONTINUED)
+        {
+            break;
+        }
         Serial.println("\tFailed to initialize");
         delay(1000);
     }
