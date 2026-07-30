@@ -210,61 +210,74 @@ void vTask_LED_handler(void *parameter)
 
 void updateLoggingMode(button_state_t user_input)
 {
-    if (user_input == BUTTON_SHORT_PRESS_CONFIRMED)
+    button_press_t state = user_input.state;
+    int button_index = user_input.button_index;
+    if (button_index == -1)
     {
-        switch (logging_mode)
+        return;
+    }
+    else if (button_index == 0)
+    {
+        if (state == BUTTON_SHORT_PRESS_CONFIRMED)
         {
-        case LOGGING_MODE_INACTIVE:
-        {
-            logging_mode = LOGGING_MODE_START;
-            break;
-        }
+            switch (logging_mode)
+            {
+            case LOGGING_MODE_INACTIVE:
+            {
+                logging_mode = LOGGING_MODE_START;
+                break;
+            }
 
-        case LOGGING_MODE_ACTIVE:
-        {
-            logging_mode = LOGGING_MODE_STOP;
-            break;
+            case LOGGING_MODE_ACTIVE:
+            {
+                logging_mode = LOGGING_MODE_STOP;
+                break;
+            }
+            case LOGGING_MODE_WAITGPS:
+            case LOGGING_MODE_STOP:
+            case LOGGING_MODE_START:
+            case LOGGING_MODE_WIFI_ACTIVE:
+            case LOGGING_MODE_WIFI_STOP:
+            default:
+            {
+                break;
+            }
+            }
         }
-        case LOGGING_MODE_WAITGPS:
-        case LOGGING_MODE_STOP:
-        case LOGGING_MODE_START:
-        case LOGGING_MODE_WIFI_ACTIVE:
-        case LOGGING_MODE_WIFI_STOP:
-        default:
+        else if (button_index == BUTTON_LONG_PRESS_CONFIRMED)
         {
-            break;
-        }
+            switch (logging_mode)
+            {
+            case LOGGING_MODE_WAITGPS:
+            {
+                Serial.println("Overriding GPS wait");
+                logging_mode = LOGGING_MODE_INACTIVE;
+                break;
+            }
+            case LOGGING_MODE_INACTIVE:
+            {
+                logging_mode = LOGGING_MODE_WIFI_START;
+                break;
+            }
+            case LOGGING_MODE_WIFI_ACTIVE:
+            {
+                logging_mode = LOGGING_MODE_WIFI_STOP;
+                break;
+            }
+            case LOGGING_MODE_WIFI_STOP:
+            case LOGGING_MODE_START:
+            case LOGGING_MODE_ACTIVE:
+            case LOGGING_MODE_STOP:
+            default:
+            {
+                break;
+            }
+            }
         }
     }
-    else if (user_input == BUTTON_LONG_PRESS_CONFIRMED)
+    else if (button_index == 1)
     {
-        switch (logging_mode)
-        {
-        case LOGGING_MODE_WAITGPS:
-        {
-            Serial.println("Overriding GPS wait");
-            logging_mode = LOGGING_MODE_INACTIVE;
-            break;
-        }
-        case LOGGING_MODE_INACTIVE:
-        {
-            logging_mode = LOGGING_MODE_WIFI_START;
-            break;
-        }
-        case LOGGING_MODE_WIFI_ACTIVE:
-        {
-            logging_mode = LOGGING_MODE_WIFI_STOP;
-            break;
-        }
-        case LOGGING_MODE_WIFI_STOP:
-        case LOGGING_MODE_START:
-        case LOGGING_MODE_ACTIVE:
-        case LOGGING_MODE_STOP:
-        default:
-        {
-            break;
-        }
-        }
+        // TODO handle button 2
     }
 }
 
@@ -324,8 +337,8 @@ void setup()
     setupLED();
     xTaskCreatePinnedToCore(vTask_LED_handler, "LED_handler", 2048, NULL, 1, NULL, 0);
 
-    // set up buttons
-    but1.begin(BUT1, 750, false);
+    // set up buttons TODO multi button
+    but1.begin(BUTS, 750, NUMBUTS, BUTS_V);
 
     // set up GPS
     Serial.println("GPS");
@@ -357,10 +370,26 @@ void setup()
     while (digitalRead(SD_CD))
     {
         Serial.println("\tWaiting for SD card...");
+        button_state_t state = but1.readButtonState();
+        if (state.button_index == 0 && state.state == BUTTON_LONG_PRESS_CONFIRMED)
+        {
+            Serial.println("\tOverriding SD card detection");
+            break;
+        }
         delay(1000);
     }
     while (!SD.begin(SPI_CS_SD, SPI, 40000000))
     {
+        button_state_t state = but1.readButtonState();
+        if (state.button_index == 0 && state.state == BUTTON_LONG_PRESS_CONFIRMED)
+        {
+            Serial.println("\tOverriding SD card detection");
+            break;
+        }
+        if (state.button_index == 0 && state.state == BUTTON_LONG_PRESS_CONTINUED)
+        {
+            break;
+        }
         Serial.println("\tFailed to initialize");
         delay(1000);
     }
