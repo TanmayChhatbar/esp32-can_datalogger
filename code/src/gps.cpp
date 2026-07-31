@@ -6,11 +6,13 @@ bool setupGPS()
 {
     // begin at 9600 baud
     GPSSerial.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
-
-    // change baud to 115200
-    delay(250);
-    GPS.sendCommand(PMTK_SET_BAUD_115200);
-    delay(250);
+    if (GPS.begin(9600))
+    {
+        // change baud to 115200
+        delay(250);
+        GPS.sendCommand(PMTK_SET_BAUD_115200);
+        delay(250);
+    }
     GPSSerial.end();
     delay(250);
     GPSSerial.begin(115200, SERIAL_8N1, GPS_RX, GPS_TX);
@@ -38,7 +40,6 @@ bool setupGPS()
         if (GPS.newNMEAreceived())
             return GPS.parse(GPS.lastNMEA());
     }
-
     return false;
 }
 

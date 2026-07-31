@@ -342,8 +342,7 @@ void setup()
 
     // set up GPS
     Serial.println("GPS");
-    delay(2000);
-
+    delay(200);
     while (!setupGPS())
     {
         Serial.println("\tFailed to initialize");
@@ -611,11 +610,27 @@ void loop()
         // close file
         log_file.flush();
         size_t log_file_size = log_file.size();
-        Serial.print("Logging stopped:\t");
+        Serial.print("Logging stopped: ");
         Serial.print(log_file.path());
-        Serial.print("\t(");
+        Serial.print(" (");
         Serial.print(log_file_size);
-        Serial.println(" bytes)");
+        Serial.print(" bytes) ");
+        if (log_file_size > 1024 * 1024)
+        {
+            Serial.print("(");
+            Serial.print(log_file_size / (1024 * 1024));
+            Serial.println(" MB)");
+        }
+        else if (log_file_size > 1024)
+        {
+            Serial.print("(");
+            Serial.print(log_file_size / 1024);
+            Serial.println(" kB)");
+        }
+        else
+        {
+            Serial.println();
+        }
         log_file.close();
         logging_mode = LOGGING_MODE_INACTIVE;
         break;
