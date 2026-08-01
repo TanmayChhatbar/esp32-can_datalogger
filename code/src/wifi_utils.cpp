@@ -267,8 +267,11 @@ bool serveDir(File dir)
         entry.close();
     }
     page += INDEX_TABLE_END;
-    page += "<br><br>";
-    page += MOVELOGS_BUTTON;
+    if (strcmp(dir.name(), "/") == 0 || strcmp(dir.name(), "") == 0)
+    {
+        page += "<br><br>";
+        page += MOVELOGS_BUTTON;
+    }
     page += INDEX_HTML_END;
     page += script;
     page += HTML_DL_SCRIPT_END;
@@ -336,7 +339,7 @@ void handleNotFound()
 
 bool wifiEnable()
 {
-    WiFi.mode(WIFI_MODE_SEL);
+    WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     Serial.print("Connecting to ");
     Serial.println(ssid);

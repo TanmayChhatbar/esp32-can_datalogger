@@ -47,4 +47,4 @@ constexpr float BUTS_V[] = {1.31f, 0.0f};
 #define SERIAL_COMMANDS 1
 
 // wifi
-#define WIFI_MODE_SEL WIFI_MODE_AP
+#define USE_WIFI 1 // or hotspot

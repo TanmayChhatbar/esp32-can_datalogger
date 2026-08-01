@@ -444,7 +444,7 @@ void setup()
     }
 
     // move to wait for GPS fix
-    logging_mode = LOGGING_MODE_WIFI_START;
+    logging_mode = LOGGING_MODE_WAITGPS;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -507,10 +507,11 @@ void loop()
 
     case LOGGING_MODE_WIFI_START:
     {
-#if WIFI_MODE_SEL == WIFI_MODE_AP
-        bool status = wifiEnableAP();
-#elif WIFI_MODE_SEL == WIFI_MODE_STA
-        bool status = wifiEnable();
+        bool status = false;
+#if USE_WIFI
+        status = wifiEnable();
+#else
+        status = wifiEnableAP();
 #endif
         if (status)
         {
