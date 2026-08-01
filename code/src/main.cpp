@@ -9,6 +9,7 @@
 #include "gps.h"
 #include "button.hpp"
 #include "wifi_utils.h"
+#include <ArduinoOTA.h>
 
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
@@ -281,7 +282,6 @@ void updateLoggingMode(button_state_t user_input)
             }
             case LOGGING_MODE_INACTIVE:
             {
-                Serial.println("Starting WiFi");
                 logging_mode = LOGGING_MODE_WIFI_START;
                 break;
             }
@@ -510,16 +510,18 @@ void loop()
         bool status = wifiEnable();
         if (!status)
         {
-            Serial.println("Failed to start WiFi, trying hotspot");
             status = wifiEnableAP();
         }
         if (status)
         {
             logging_mode = LOGGING_MODE_WIFI_ACTIVE;
+            ArduinoOTA.setHostname("esp32-ota");
+            ArduinoOTA.setPassword("admin");
+            ArduinoOTA.begin();
         }
         else
         {
-            Serial.println("Failed to start WiFi Hotspot, returning to inactive mode");
+            Serial.println("Returning to Inactive");
             logging_mode = LOGGING_MODE_INACTIVE;
         }
         break;
@@ -527,6 +529,7 @@ void loop()
     case LOGGING_MODE_WIFI_ACTIVE:
     {
         server.handleClient();
+        ArduinoOTA.handle();
         delay(2); // allow the cpu to switch to other tasks
         break;
     }
@@ -554,9 +557,9 @@ void loop()
         xQueueReset(canRxQueue);                                         // reset queue so no frames are logged with false timestamps
 
         // start OBD request tasks
-        xTaskCreatePinnedToCore(vTask_OBD_Request_1Hz, "OBD_Request_1Hz", 4096, NULL, 1, NULL, 0);
-        xTaskCreatePinnedToCore(vTask_OBD_Request_10Hz, "OBD_Request_10Hz", 4096, NULL, 1, NULL, 0);
-        xTaskCreatePinnedToCore(vTask_IMU_Poll_100Hz, "IMU_Poll_100Hz", 4096, NULL, 1, NULL, 0);
+        xTaskCreatePinnedToCore(vTask_OBD_Request_1Hz, "OBD_1Hz", 4096, NULL, 1, NULL, 0);
+        xTaskCreatePinnedToCore(vTask_OBD_Request_10Hz, "OBD_10Hz", 4096, NULL, 1, NULL, 0);
+        xTaskCreatePinnedToCore(vTask_IMU_Poll_100Hz, "IMU_100Hz", 4096, NULL, 1, NULL, 0);
 
         break;
     }

@@ -1,7 +1,7 @@
 #include "wifi_utils.h"
 
 WebServer server(80);
-const char *host = "esp32sd";
+const char *host = "esp32logger";
 File uploadFile;
 
 static const char INDEX_HTML_START[] PROGMEM = R"rawliteral(
@@ -52,7 +52,6 @@ bool moveLogs()
     // create /downloaded/ if it doesn't exist
     if (!SD.exists("/downloaded"))
     {
-        Serial.println("\tCreating /downloaded");
         SD.mkdir("/downloaded");
     }
 
@@ -251,11 +250,6 @@ void handleNotFound()
         File dataFile = SD.open(server.uri());
         if (dataFile)
         {
-            if (server.hasArg("download"))
-            {
-                String dataType = "application/octet-stream";
-            }
-
             if (server.streamFile(dataFile, dataType) != dataFile.size())
             {
                 Serial.println("Sent less data than expected!");
@@ -285,8 +279,7 @@ bool wifiEnable()
 {
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
-    Serial.print("Connecting to ");
-    Serial.println(ssid);
+    Serial.printf("WiFi\n\tConnecting to %s\n", ssid);
 
     // Wait for connection
     uint8_t i = 0;
@@ -296,27 +289,19 @@ bool wifiEnable()
     }
     if (i == 21)
     {
-        Serial.print("Could not connect to ");
-        Serial.println(ssid);
+        Serial.println("\tFailed");
         return false;
     }
-    Serial.print("Connected! IP address: ");
+    Serial.print("\tIP: ");
     Serial.println(WiFi.localIP());
 
     if (MDNS.begin(host))
     {
         MDNS.addService("http", "tcp", 80);
-        Serial.println("MDNS responder started");
-        Serial.print("You can now connect to http://");
-        Serial.print(host);
-        Serial.println(".local");
+        Serial.printf("\thttp://%s.local\n", host);
     }
-
     server.onNotFound(handleNotFound);
-
     server.begin();
-    Serial.println("HTTP server started");
-
     return true;
 }
 
@@ -325,38 +310,19 @@ bool wifiEnableAP()
     // Configure ESP32 as a Wi-Fi hotspot
     WiFi.mode(WIFI_AP);
 
-    Serial.print("Starting hotspot: ");
-    Serial.println(ssidAP);
-    Serial.println(passwordAP);
+    Serial.printf("Hotspot\n\t%s (%s)\n", ssidAP, passwordAP);
 
     // Start access point
     if (!WiFi.softAP(ssidAP, passwordAP))
     {
-        Serial.println("Could not start Wi-Fi hotspot");
+        Serial.println("\tFailed");
         return false;
     }
 
-    Serial.print("Hotspot started! IP address: ");
-    Serial.println(WiFi.softAPIP());
-
-    // Optional mDNS address: http://<host>.local
-    if (MDNS.begin(host))
-    {
-        MDNS.addService("http", "tcp", 80);
-        Serial.println("mDNS responder started");
-        Serial.print("You can connect to http://");
-        Serial.print(host);
-        Serial.println(".local");
-    }
-    else
-    {
-        Serial.println("Could not start mDNS responder");
-    }
+    Serial.printf("IP: %s\n", WiFi.softAPIP().toString().c_str());
 
     server.onNotFound(handleNotFound);
-
     server.begin();
-    Serial.println("HTTP server started");
 
     return true;
 }
