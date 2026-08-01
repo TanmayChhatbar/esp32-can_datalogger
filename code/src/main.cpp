@@ -365,7 +365,6 @@ void setup()
 
     // set up GPS
     Serial.println("GPS");
-    delay(200);
     while (!setupGPS())
     {
         Serial.println("\tFailed to initialize");

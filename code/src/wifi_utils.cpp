@@ -31,7 +31,19 @@ static const char INDEX_HTML_START[] PROGMEM = R"rawliteral(
         text-align: left;
         border-bottom: 1px solid #e2e8f0
     }
+    button {
+        padding: 10px 16px;
+        border: 0;
+        border-radius: 8px;
+        background: #2563eb;
+        color: white;
+        font: inherit;
+        cursor: pointer;
+    }
 
+    button:hover {
+        background: #1d4ed8;
+    }
 </style>
 <main>
     <h1>ESP32-CAN Datalogger</h1>
@@ -39,6 +51,10 @@ static const char INDEX_HTML_START[] PROGMEM = R"rawliteral(
 
 const char DOWNLOAD_BUTTON[] PROGMEM = R"rawliteral(
     <button onclick="downloadFiles()">Download all log files</button>
+)rawliteral";
+
+const char MOVELOGS_BUTTON[] PROGMEM = R"rawliteral(
+    <button onclick="location.href='/move_logs'">Move logs</button>
 )rawliteral";
 
 const char INDEX_TABLE_START[] PROGMEM = R"rawliteral(
@@ -78,6 +94,68 @@ const char HTML_DL_SCRIPT_END[] PROGMEM = R"rawliteral(
         }
     </script>
 )rawliteral";
+
+bool moveLogs()
+{
+    // move all log files from / to /downloaded/
+    Serial.println("Moving logs to /downloaded/");
+    File dir = SD.open("/");
+    if (!dir)
+    {
+        return false;
+    }
+
+    // create /downloaded/ if it doesn't exist
+    if (!SD.exists("/downloaded"))
+    {
+        Serial.println("\tCreating /downloaded");
+        SD.mkdir("/downloaded");
+    }
+
+    // move all log files to /downloaded/
+    String first_file = "";
+    while (true)
+    {
+        File entry = dir.openNextFile();
+        if (!entry)
+        {
+            break;
+        }
+        else if (strcmp(entry.name(), first_file.c_str()) == 0)
+        {
+            entry.close();
+            break;
+        }
+        else if (first_file == "")
+        {
+            first_file = String(entry.name());
+        }
+
+        if (entry.isDirectory())
+        {
+            entry.close();
+            continue;
+        }
+
+        if (entry.name()[0] == '.')
+        {
+            entry.close();
+            continue;
+        }
+
+        if (String(entry.name()).endsWith(".log"))
+        {
+            String oldPath = "/" + String(entry.name());
+            String newPath = "/downloaded/" + String(entry.name());
+            Serial.printf("\t%s\t-> %s\n", oldPath.c_str(), newPath.c_str());
+            SD.rename(oldPath, newPath);
+        }
+
+        entry.close();
+    }
+    dir.close();
+    return true;
+}
 
 void returnOK()
 {
@@ -189,7 +267,8 @@ bool serveDir(File dir)
         entry.close();
     }
     page += INDEX_TABLE_END;
-
+    page += "<br><br>";
+    page += MOVELOGS_BUTTON;
     page += INDEX_HTML_END;
     page += script;
     page += HTML_DL_SCRIPT_END;
@@ -199,6 +278,20 @@ bool serveDir(File dir)
 
 void handleNotFound()
 {
+    if (server.uri() == "/move_logs")
+    {
+        if (moveLogs())
+        {
+            // redirect to root page after moving logs
+            server.sendHeader("Location", "/");
+            server.send(302, "text/plain", "");
+        }
+        else
+        {
+            returnFail("Failed to move logs");
+        }
+        return;
+    }
     File dir = SD.open(server.uri());
     if (dir.isDirectory())
     {
