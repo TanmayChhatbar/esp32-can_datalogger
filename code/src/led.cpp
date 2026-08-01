@@ -50,7 +50,7 @@ bool handleLED(logging_mode_t logging_mode, unsigned long time_since_last_change
             break;
         case LOGGING_MODE_WIFI_START:
             new_color = CRGB::Blue;
-            toggle_time = 200;
+            toggle_time = 50;
             break;
         case LOGGING_MODE_WIFI_ACTIVE:
             new_color = CRGB::Blue;
@@ -58,7 +58,7 @@ bool handleLED(logging_mode_t logging_mode, unsigned long time_since_last_change
             break;
         case LOGGING_MODE_WIFI_STOP:
             new_color = CRGB::Blue;
-            toggle_time = 200;
+            toggle_time = 50;
             break;
         default:
             new_color = CRGB::White;
