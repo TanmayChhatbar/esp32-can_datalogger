@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <FastLED.h>
+#include <Adafruit_NeoPixel.h>
 #include "defs.h"
 #include "led.h"
 #include "can.h"
@@ -580,7 +580,7 @@ void loop()
                         if (pid == OBD_1Hz_ID)
                         {
                             OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 1)) - 1; // increment and wait at -1
-                            overrideLED(CRGB::Orange);
+                            overrideLED(GRB_YELLOW);
 #if SERIAL_OBD_REQUESTS
                             Serial.println("\t\tReceived: " + OBDSignalToString(OBD_1Hz_ID));
 #endif
@@ -588,7 +588,7 @@ void loop()
                         if (pid == OBD_10Hz_ID)
                         {
                             OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 1)) - 1; // increment and wait at -1
-                            overrideLED(CRGB::Orange);
+                            overrideLED(GRB_YELLOW);
 #if SERIAL_OBD_REQUESTS
                             Serial.println("\t\tReceived: " + OBDSignalToString(OBD_10Hz_ID));
 #endif
