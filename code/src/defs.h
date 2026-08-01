@@ -45,3 +45,6 @@ constexpr float BUTS_V[] = {1.31f, 0.0f};
 #define SERIAL_OBD_REQUESTS 0
 #define SERIAL_PRINT_CAN 1
 #define SERIAL_COMMANDS 1
+
+// wifi
+#define WIFI_MODE_SEL WIFI_MODE_AP

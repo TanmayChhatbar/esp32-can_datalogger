@@ -507,8 +507,12 @@ void loop()
 
     case LOGGING_MODE_WIFI_START:
     {
-        // TODO
-        if (wifiEnable())
+#if WIFI_MODE_SEL == WIFI_MODE_AP
+        bool status = wifiEnableAP();
+#elif WIFI_MODE_SEL == WIFI_MODE_STA
+        bool status = wifiEnable();
+#endif
+        if (status)
         {
             logging_mode = LOGGING_MODE_WIFI_ACTIVE;
         }

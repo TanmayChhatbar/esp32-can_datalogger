@@ -336,7 +336,7 @@ void handleNotFound()
 
 bool wifiEnable()
 {
-    WiFi.mode(WIFI_STA);
+    WiFi.mode(WIFI_MODE_SEL);
     WiFi.begin(ssid, password);
     Serial.print("Connecting to ");
     Serial.println(ssid);
@@ -363,6 +363,47 @@ bool wifiEnable()
         Serial.print("You can now connect to http://");
         Serial.print(host);
         Serial.println(".local");
+    }
+
+    server.onNotFound(handleNotFound);
+
+    server.begin();
+    Serial.println("HTTP server started");
+
+    return true;
+}
+
+bool wifiEnableAP()
+{
+    // Configure ESP32 as a Wi-Fi hotspot
+    WiFi.mode(WIFI_AP);
+
+    Serial.print("Starting hotspot: ");
+    Serial.println(ssidAP);
+    Serial.println(passwordAP);
+
+    // Start access point
+    if (!WiFi.softAP(ssidAP, passwordAP))
+    {
+        Serial.println("Could not start Wi-Fi hotspot");
+        return false;
+    }
+
+    Serial.print("Hotspot started! IP address: ");
+    Serial.println(WiFi.softAPIP());
+
+    // Optional mDNS address: http://<host>.local
+    if (MDNS.begin(host))
+    {
+        MDNS.addService("http", "tcp", 80);
+        Serial.println("mDNS responder started");
+        Serial.print("You can connect to http://");
+        Serial.print(host);
+        Serial.println(".local");
+    }
+    else
+    {
+        Serial.println("Could not start mDNS responder");
     }
 
     server.onNotFound(handleNotFound);
