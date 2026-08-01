@@ -4,6 +4,81 @@ WebServer server(80);
 const char *host = "esp32sd";
 File uploadFile;
 
+static const char INDEX_HTML_START[] PROGMEM = R"rawliteral(
+<!doctype html>
+<meta charset="utf-8">
+<style>
+    body {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #ddd;
+        font: 16px Arial
+    }
+    main {
+        width: 680px;
+        max-width: 92%;
+        padding: 28px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 0 20px rgba(0,0,0,.1)
+    }
+    table {
+        width: 100%;
+    }
+    th,td {
+        padding: 13px 12px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0
+    }
+
+</style>
+<main>
+    <h1>ESP32-CAN Datalogger</h1>
+)rawliteral";
+
+const char DOWNLOAD_BUTTON[] PROGMEM = R"rawliteral(
+    <button onclick="downloadFiles()">Download all log files</button>
+)rawliteral";
+
+const char INDEX_TABLE_START[] PROGMEM = R"rawliteral(
+    <br>
+    <br>
+    <table>
+        <thead><tr><th>Filename<th>Size
+        <tbody>
+)rawliteral";
+
+const char INDEX_TABLE_END[] PROGMEM = R"rawliteral(
+    </table>
+)rawliteral";
+
+const char INDEX_HTML_END[] PROGMEM = R"rawliteral(
+</main>
+)rawliteral";
+
+const char HTML_DL_SCRIPT_START[] PROGMEM = R"rawliteral(
+    <script>
+        function downloadFiles() {
+            const files = [
+)rawliteral";
+const char HTML_DL_SCRIPT_END[] PROGMEM = R"rawliteral(
+            ];
+
+            files.forEach((file, index) => {
+                setTimeout(() => {
+                    const link = document.createElement("a");
+                    link.href = file;
+                    link.download = "";
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                }, index * 500);
+            });
+        }
+    </script>
+)rawliteral";
+
 void returnOK()
 {
     server.send(200, "text/plain", "");
@@ -14,259 +89,141 @@ void returnFail(String msg)
     server.send(500, "text/plain", msg + "\r\n");
 }
 
-bool loadFromSdCard(String path)
+String getStorageDetails()
+{
+    uint64_t totalBytes = SD.cardSize();
+    uint64_t usedBytes = SD.usedBytes();
+    uint64_t freeBytes = totalBytes - usedBytes;
+
+    float totalMB = totalBytes / (1024.0f * 1024.0f);
+    float usedMB = usedBytes / (1024.0f * 1024.0f);
+    float freeMB = freeBytes / (1024.0f * 1024.0f);
+
+    float usedPercent = totalBytes > 0
+                            ? (usedBytes * 100.0f) / totalBytes
+                            : 0.0f;
+
+    return "SD: " + String(usedMB, 1) + " MB used of " +
+           String(totalMB, 1) + " MB (" +
+           String(usedPercent, 1) + "%), " +
+           String(freeMB, 1) + " MB free";
+}
+
+bool serveDir(File dir)
 {
     String dataType = "text/plain";
-    if (path.endsWith("/"))
+    String page = INDEX_HTML_START;
+    String script = HTML_DL_SCRIPT_START;
+    // page += "<p>" + storage_details + "</p>";
+    page += getStorageDetails();
+    page += "<br><br>";
+    page += DOWNLOAD_BUTTON;
+    page += INDEX_TABLE_START;
+    // add link to parent directory
+    if (strcmp(dir.name(), "/") != 0 && strcmp(dir.name(), "") != 0)
     {
-        path += "index.htm";
+        page += "<tr><td><a href=\"..\">..</a> <td>-</tr>";
     }
 
-    if (path.endsWith(".src"))
-    {
-        path = path.substring(0, path.lastIndexOf("."));
-    }
-    else if (path.endsWith(".htm"))
-    {
-        dataType = "text/html";
-    }
-    else if (path.endsWith(".css"))
-    {
-        dataType = "text/css";
-    }
-    else if (path.endsWith(".js"))
-    {
-        dataType = "application/javascript";
-    }
-    else if (path.endsWith(".png"))
-    {
-        dataType = "image/png";
-    }
-    else if (path.endsWith(".gif"))
-    {
-        dataType = "image/gif";
-    }
-    else if (path.endsWith(".jpg"))
-    {
-        dataType = "image/jpeg";
-    }
-    else if (path.endsWith(".ico"))
-    {
-        dataType = "image/x-icon";
-    }
-    else if (path.endsWith(".xml"))
-    {
-        dataType = "text/xml";
-    }
-    else if (path.endsWith(".pdf"))
-    {
-        dataType = "application/pdf";
-    }
-    else if (path.endsWith(".zip"))
-    {
-        dataType = "application/zip";
-    }
-
-    File dataFile = SD.open(path.c_str());
-    if (dataFile.isDirectory())
-    {
-        path += "/index.htm";
-        dataType = "text/html";
-        dataFile = SD.open(path.c_str());
-    }
-
-    if (!dataFile)
-    {
-        return false;
-    }
-
-    if (server.hasArg("download"))
-    {
-        dataType = "application/octet-stream";
-    }
-
-    if (server.streamFile(dataFile, dataType) != dataFile.size())
-    {
-        Serial.println("Sent less data than expected!");
-    }
-
-    dataFile.close();
-    return true;
-}
-
-void handleFileUpload()
-{
-    if (server.uri() != "/edit")
-    {
-        return;
-    }
-    HTTPUpload &upload = server.upload();
-    if (upload.status == UPLOAD_FILE_START)
-    {
-        if (SD.exists((char *)upload.filename.c_str()))
-        {
-            SD.remove((char *)upload.filename.c_str());
-        }
-        uploadFile = SD.open(upload.filename.c_str(), FILE_WRITE);
-        Serial.print("Upload: START, filename: ");
-        Serial.println(upload.filename);
-    }
-    else if (upload.status == UPLOAD_FILE_WRITE)
-    {
-        if (uploadFile)
-        {
-            uploadFile.write(upload.buf, upload.currentSize);
-        }
-        Serial.print("Upload: WRITE, Bytes: ");
-        Serial.println(upload.currentSize);
-    }
-    else if (upload.status == UPLOAD_FILE_END)
-    {
-        if (uploadFile)
-        {
-            uploadFile.close();
-        }
-        Serial.print("Upload: END, Size: ");
-        Serial.println(upload.totalSize);
-    }
-}
-
-void deleteRecursive(String path)
-{
-    File file = SD.open((char *)path.c_str());
-    if (!file.isDirectory())
-    {
-        file.close();
-        SD.remove((char *)path.c_str());
-        return;
-    }
-
-    file.rewindDirectory();
+    // add list of log files in SD card
     while (true)
-    {
-        File entry = file.openNextFile();
-        if (!entry)
-        {
-            break;
-        }
-        String entryPath = path + "/" + entry.name();
-        if (entry.isDirectory())
-        {
-            entry.close();
-            deleteRecursive(entryPath);
-        }
-        else
-        {
-            entry.close();
-            SD.remove((char *)entryPath.c_str());
-        }
-        yield();
-    }
-
-    SD.rmdir((char *)path.c_str());
-    file.close();
-}
-
-void handleDelete()
-{
-    if (server.args() == 0)
-    {
-        return returnFail("BAD ARGS");
-    }
-    String path = server.arg(0);
-    if (path == "/" || !SD.exists((char *)path.c_str()))
-    {
-        returnFail("BAD PATH");
-        return;
-    }
-    deleteRecursive(path);
-    returnOK();
-}
-
-void handleCreate()
-{
-    if (server.args() == 0)
-    {
-        return returnFail("BAD ARGS");
-    }
-    String path = server.arg(0);
-    if (path == "/" || SD.exists((char *)path.c_str()))
-    {
-        returnFail("BAD PATH");
-        return;
-    }
-
-    if (path.indexOf('.') > 0)
-    {
-        File file = SD.open((char *)path.c_str(), FILE_WRITE);
-        if (file)
-        {
-            file.write(0);
-            file.close();
-        }
-    }
-    else
-    {
-        SD.mkdir((char *)path.c_str());
-    }
-    returnOK();
-}
-
-void printDirectory()
-{
-    if (!server.hasArg("dir"))
-    {
-        return returnFail("BAD ARGS");
-    }
-    String path = server.arg("dir");
-    if (path != "/" && !SD.exists((char *)path.c_str()))
-    {
-        return returnFail("BAD PATH");
-    }
-    File dir = SD.open((char *)path.c_str());
-    path = String();
-    if (!dir.isDirectory())
-    {
-        dir.close();
-        return returnFail("NOT DIR");
-    }
-    dir.rewindDirectory();
-    server.setContentLength(CONTENT_LENGTH_UNKNOWN);
-    server.send(200, "text/json", "");
-
-    server.sendContent("[");
-    for (int cnt = 0; true; ++cnt)
     {
         File entry = dir.openNextFile();
         if (!entry)
         {
             break;
         }
-
-        String output;
-        if (cnt > 0)
+        if (strcmp(entry.name(), "System Volume Information") == 0)
         {
-            output = ',';
+            entry.close();
+            continue;
         }
 
-        output += "{\"type\":\"";
-        output += (entry.isDirectory()) ? "dir" : "file";
-        output += "\",\"name\":\"";
-        output += entry.path();
-        output += "\"";
-        output += "}";
-        server.sendContent(output);
+        String name = entry.name();
+        String url = entry.path();
+        String size;
+        bool isDir = entry.isDirectory();
+        if (isDir)
+        {
+            size = "-";
+            name += "/";
+        }
+        else
+        {
+            if (entry.size() > 1024 * 1024)
+            {
+                size = String(entry.size() / (1024 * 1024));
+                size += " MB";
+            }
+            else if (entry.size() > 1024)
+            {
+                size = String(entry.size() / 1024);
+                size += " KB";
+            }
+            else
+            {
+                size = String(entry.size());
+                size += " B";
+            }
+
+            if (name.endsWith(".log"))
+            {
+                script += "                \"" + url + "\",\n";
+            }
+        }
+        String output_table = "<tr><td><a href=\"";
+        output_table += url;
+        if (isDir)
+        {
+            output_table += "\">";
+        }
+        else
+        {
+            output_table += "\" download>";
+        }
+        output_table += name;
+        output_table += "</a> <td>";
+        output_table += size;
+        output_table += "</tr>";
+        page += output_table;
         entry.close();
     }
-    server.sendContent("]");
-    dir.close();
+    page += INDEX_TABLE_END;
+
+    page += INDEX_HTML_END;
+    page += script;
+    page += HTML_DL_SCRIPT_END;
+    server.send(200, "text/html", page);
+    return true;
 }
 
 void handleNotFound()
 {
-    if (loadFromSdCard(server.uri()))
+    File dir = SD.open(server.uri());
+    if (dir.isDirectory())
     {
+        serveDir(dir);
         return;
+    }
+    else // is file
+    {
+        String dataType = "text/plain";
+        File dataFile = SD.open(server.uri());
+        if (dataFile)
+        {
+            if (server.hasArg("download"))
+            {
+                String dataType = "application/octet-stream";
+            }
+
+            if (server.streamFile(dataFile, dataType) != dataFile.size())
+            {
+                Serial.println("Sent less data than expected!");
+            }
+
+            dataFile.close();
+            return;
+        }
     }
     String message = "SDCARD Not Detected\n\n";
     message += "URI: ";
@@ -299,7 +256,7 @@ bool wifiEnable()
     }
     if (i == 21)
     {
-        Serial.print("Could not connect to");
+        Serial.print("Could not connect to ");
         Serial.println(ssid);
         return false;
     }
@@ -315,20 +272,18 @@ bool wifiEnable()
         Serial.println(".local");
     }
 
-    server.on("/list", HTTP_GET, printDirectory);
-    server.on("/edit", HTTP_DELETE, handleDelete);
-    server.on("/edit", HTTP_PUT, handleCreate);
-    server.on(
-        "/edit", HTTP_POST,
-        []()
-        {
-            returnOK();
-        },
-        handleFileUpload);
     server.onNotFound(handleNotFound);
 
     server.begin();
     Serial.println("HTTP server started");
 
+    return true;
+}
+
+bool wifiDisable()
+{
+    server.close();
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
     return true;
 }

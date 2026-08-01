@@ -35,7 +35,7 @@
 #define NUM_LED 1
 #define BUTS 5
 #define NUMBUTS 2
-constexpr float BUTS_V[] = {0.0f, 1.31f};
+constexpr float BUTS_V[] = {1.31f, 0.0f};
 
 // settings
 #define SERIAL_GPS 0
