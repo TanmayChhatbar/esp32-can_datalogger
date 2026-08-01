@@ -8,91 +8,35 @@ static const char INDEX_HTML_START[] PROGMEM = R"rawliteral(
 <!doctype html>
 <meta charset="utf-8">
 <style>
-    body {
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
-        background: #ddd;
-        font: 16px Arial
-    }
-    main {
-        width: 680px;
-        max-width: 92%;
-        padding: 28px;
-        background: #ffffff;
-        border-radius: 20px;
-        box-shadow: 0 0 20px rgba(0,0,0,.1)
-    }
-    table {
-        width: 100%;
-    }
-    th,td {
-        padding: 13px 12px;
-        text-align: left;
-        border-bottom: 1px solid #e2e8f0
-    }
-    button {
-        padding: 10px 16px;
-        border: 0;
-        border-radius: 8px;
-        background: #2563eb;
-        color: white;
-        font: inherit;
-        cursor: pointer;
-    }
-
-    button:hover {
-        background: #1d4ed8;
-    }
+body {min-height:100vh;display: grid;place-items: center;background: #ddd;font: 16px Arial}
+main {width: 680px;max-width: 92%;padding: 28px;background: #ffffff;border-radius: 20px;box-shadow: 0 0 20px rgba(0,0,0,.1)}
+table {width: 100%;}
+th,td {padding: 13px 12px;text-align: left;border-bottom: 1px solid #e2e8f0}
+button {padding: 10px 16px;border: 0;border-radius: 8px;background: #2563eb;color: white;font: inherit;cursor: pointer;}
+button:hover {background: #1d4ed8;}
 </style>
-<main>
-    <h1>ESP32-CAN Datalogger</h1>
+<main><h1>ESP32-CAN Datalogger</h1>
 )rawliteral";
-
-const char DOWNLOAD_BUTTON[] PROGMEM = R"rawliteral(
-    <button onclick="downloadFiles()">Download all log files</button>
-)rawliteral";
-
-const char MOVELOGS_BUTTON[] PROGMEM = R"rawliteral(
-    <button onclick="location.href='/move_logs'">Move logs</button>
-)rawliteral";
-
-const char INDEX_TABLE_START[] PROGMEM = R"rawliteral(
-    <br>
-    <br>
-    <table>
-        <thead><tr><th>Filename<th>Size
-        <tbody>
-)rawliteral";
-
-const char INDEX_TABLE_END[] PROGMEM = R"rawliteral(
-    </table>
-)rawliteral";
-
-const char INDEX_HTML_END[] PROGMEM = R"rawliteral(
-</main>
-)rawliteral";
-
-const char HTML_DL_SCRIPT_START[] PROGMEM = R"rawliteral(
-    <script>
-        function downloadFiles() {
-            const files = [
-)rawliteral";
+const char DOWNLOAD_BUTTON[] PROGMEM = R"rawliteral(<button onclick="dlFiles()">Download all log files</button>)rawliteral";
+const char MOVELOGS_BUTTON[] PROGMEM = R"rawliteral(<button onclick="location.href='/move_logs'">Move logs</button>)rawliteral";
+const char INDEX_TABLE_START[] PROGMEM = R"rawliteral(<br><br><table><thead><tr><th>Filename<th>Size<tbody>)rawliteral";
+const char INDEX_TABLE_END[] PROGMEM = R"rawliteral(</table>)rawliteral";
+const char INDEX_HTML_END[] PROGMEM = R"rawliteral(</main>)rawliteral";
+const char HTML_DL_SCRIPT_START[] PROGMEM = R"rawliteral(<script> function dlFiles() {const files = [)rawliteral";
 const char HTML_DL_SCRIPT_END[] PROGMEM = R"rawliteral(
-            ];
-
-            files.forEach((file, index) => {
-                setTimeout(() => {
-                    const link = document.createElement("a");
-                    link.href = file;
-                    link.download = "";
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
-                }, index * 500);
-            });
-        }
-    </script>
+];
+files.forEach((file, index) => {
+setTimeout(() => {
+const link = document.createElement("a");
+link.href = file;
+link.download = "";
+document.body.appendChild(link);
+link.click();
+link.remove();
+}, index * 500);
+});
+}
+</script>
 )rawliteral";
 
 bool moveLogs()

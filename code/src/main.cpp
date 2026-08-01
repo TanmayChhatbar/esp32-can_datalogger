@@ -507,15 +507,20 @@ void loop()
 
     case LOGGING_MODE_WIFI_START:
     {
-        bool status = false;
-#if USE_WIFI
-        status = wifiEnable();
-#else
-        status = wifiEnableAP();
-#endif
+        bool status = wifiEnable();
+        if (!status)
+        {
+            Serial.println("Failed to start WiFi, trying hotspot");
+            status = wifiEnableAP();
+        }
         if (status)
         {
             logging_mode = LOGGING_MODE_WIFI_ACTIVE;
+        }
+        else
+        {
+            Serial.println("Failed to start WiFi Hotspot, returning to inactive mode");
+            logging_mode = LOGGING_MODE_INACTIVE;
         }
         break;
     }
