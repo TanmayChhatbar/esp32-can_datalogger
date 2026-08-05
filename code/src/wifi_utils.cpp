@@ -279,6 +279,12 @@ bool wifiEnable()
 {
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
+    IPAddress local_IP(192, 168, 1, 21);
+    IPAddress gateway(192, 168, 1, 1);
+    if (!WiFi.config(local_IP, gateway))
+    {
+        Serial.println("STA Failed to configure");
+    }
     Serial.printf("WiFi\n\tConnecting to %s\n", ssid);
 
     // Wait for connection
