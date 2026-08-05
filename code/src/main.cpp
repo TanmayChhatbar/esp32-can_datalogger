@@ -83,6 +83,10 @@ void vTask_OBD_Request_1Hz(void *parameter)
                 }
             }
         }
+        else
+        {
+            Serial.println("(vT_1Hz)\tTX queue full, skipping request");
+        }
 
         vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(5)); // repeat every 5ms
     }
@@ -143,6 +147,10 @@ void vTask_OBD_Request_10Hz(void *parameter)
                     Serial.println("(vT_10Hz)\tRequest failed: " + OBDSignalToString(OBD_10Hz_ID) + "\n\tError: " + String(esp_err_to_name(err)));
                 }
             }
+        }
+        else
+        {
+            Serial.println("(vT_10Hz)\tTX queue full, skipping request");
         }
 
         vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(5)); // repeat every 5ms
