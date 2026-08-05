@@ -14,10 +14,11 @@ enum logging_mode_t
     LOGGING_MODE_STOP = 1,
     LOGGING_MODE_START = 2,
     LOGGING_MODE_ACTIVE = 3,
-    LOGGING_MODE_WIFI_START = 4,
-    LOGGING_MODE_WIFI_ACTIVE = 5,
-    LOGGING_MODE_WIFI_STOP = 6,
-    LOGGING_MODE_TEST = 7
+    LOGGING_MODE_ACTIVE_CAN = 4,
+    LOGGING_MODE_WIFI_START = 5,
+    LOGGING_MODE_WIFI_ACTIVE = 6,
+    LOGGING_MODE_WIFI_STOP = 7,
+    LOGGING_MODE_TEST = 8
 };
 
 bool writeCanFrameToSD(const log_frame_t &log_frame, File &file);

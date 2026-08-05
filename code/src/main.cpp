@@ -231,6 +231,7 @@ void updateLoggingMode(button_state_t user_input)
             }
 
             case LOGGING_MODE_ACTIVE:
+            case LOGGING_MODE_ACTIVE_CAN:
             {
                 logging_mode = LOGGING_MODE_STOP;
                 break;
@@ -256,6 +257,7 @@ void updateLoggingMode(button_state_t user_input)
             case LOGGING_MODE_WIFI_STOP:
             case LOGGING_MODE_START:
             case LOGGING_MODE_ACTIVE:
+            case LOGGING_MODE_ACTIVE_CAN:
             case LOGGING_MODE_STOP:
             default:
             {
@@ -294,6 +296,7 @@ void updateLoggingMode(button_state_t user_input)
             case LOGGING_MODE_WIFI_STOP:
             case LOGGING_MODE_START:
             case LOGGING_MODE_ACTIVE:
+            case LOGGING_MODE_ACTIVE_CAN:
             case LOGGING_MODE_STOP:
             default:
             {
@@ -458,6 +461,7 @@ void loop()
     static unsigned long wait_gps_start_ms = millis();
     static bool last_gps_fix_state = false;
     static bool gps_fix_var = true;
+    static unsigned long lastOBDReceiveTime_ms = wait_gps_start_ms;
 
     // logging actions
     switch (logging_mode)
@@ -565,8 +569,10 @@ void loop()
     }
 
     case LOGGING_MODE_ACTIVE:
+    case LOGGING_MODE_ACTIVE_CAN:
     {
         unsigned long currentTime_us = micros();
+        unsigned long currentTime_ms = millis();
 
         if (canRxQueue != nullptr)
         {
@@ -584,6 +590,8 @@ void loop()
                         {
                             OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 1)) - 1; // increment and wait at -1
                             overrideLED(GRB_YELLOW);
+                            logging_mode = LOGGING_MODE_ACTIVE_CAN;
+                            lastOBDReceiveTime_ms = currentTime_ms;
 #if SERIAL_OBD_REQUESTS
                             Serial.println("\t\tReceived: " + OBDSignalToString(OBD_1Hz_ID));
 #endif
@@ -592,6 +600,8 @@ void loop()
                         {
                             OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 1)) - 1; // increment and wait at -1
                             overrideLED(GRB_YELLOW);
+                            logging_mode = LOGGING_MODE_ACTIVE_CAN;
+                            lastOBDReceiveTime_ms = currentTime_ms;
 #if SERIAL_OBD_REQUESTS
                             Serial.println("\t\tReceived: " + OBDSignalToString(OBD_10Hz_ID));
 #endif
@@ -602,6 +612,12 @@ void loop()
                 // print to SD card
                 writeCanFrameToSD(log_frame, log_file);
             }
+        }
+
+        // if no OBD responses received for 5 seconds, switch to active mode without CAN
+        if (logging_mode == LOGGING_MODE_ACTIVE_CAN && currentTime_ms - lastOBDReceiveTime_ms > 5000)
+        {
+            logging_mode = LOGGING_MODE_ACTIVE;
         }
 
         // (virtual CAN) GPS
@@ -699,7 +715,7 @@ void loop()
             {
                 logging_mode = LOGGING_MODE_START;
             }
-            else if (logging_mode == LOGGING_MODE_ACTIVE)
+            else if (logging_mode == LOGGING_MODE_ACTIVE || logging_mode == LOGGING_MODE_ACTIVE_CAN)
             {
                 logging_mode = LOGGING_MODE_STOP;
             }

@@ -91,6 +91,7 @@ String loggingModeToString(logging_mode_t logging_mode)
     case LOGGING_MODE_START:
         return "LOGGING_MODE_START";
     case LOGGING_MODE_ACTIVE:
+    case LOGGING_MODE_ACTIVE_CAN:
         return "LOGGING_MODE_ACTIVE";
     case LOGGING_MODE_WIFI_START:
         return "LOGGING_MODE_WIFI_START";
