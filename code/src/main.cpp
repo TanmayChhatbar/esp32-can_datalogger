@@ -597,7 +597,6 @@ void loop()
                         if (pid == OBD_1Hz_ID)
                         {
                             OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 1)) - 1; // increment and wait at -1
-                            overrideLED(GRB_YELLOW);
                             logging_mode = LOGGING_MODE_ACTIVE_CAN;
                             lastOBDReceiveTime_ms = currentTime_ms;
 #if SERIAL_OBD_REQUESTS
@@ -607,7 +606,6 @@ void loop()
                         if (pid == OBD_10Hz_ID)
                         {
                             OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 1)) - 1; // increment and wait at -1
-                            overrideLED(GRB_YELLOW);
                             logging_mode = LOGGING_MODE_ACTIVE_CAN;
                             lastOBDReceiveTime_ms = currentTime_ms;
 #if SERIAL_OBD_REQUESTS
