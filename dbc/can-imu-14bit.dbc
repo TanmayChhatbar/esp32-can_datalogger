@@ -45,9 +45,9 @@ BO_ 1537 Imu_2: 8 Vector__XXX
 
 BO_ 1536 Imu_1: 7 Vector__XXX
  SG_ AngularRateX : 42|14@1- (0.0625,0) [-512|511.9375] "deg/s" Vector__XXX
- SG_ AccelerationX : 0|14@1- (0.001,0) [-8.192|8.191] "m/s^2" Vector__XXX
- SG_ AccelerationY : 14|14@1- (0.001,0) [-8.192|8.19175] "m/s^2" Vector__XXX
- SG_ AccelerationZ : 28|14@1- (0.001,0) [-8.192|8.191] "m/s^2" Vector__XXX
+ SG_ AccelerationX : 0|14@1- (0.001,0) [-8.192|8.191] "g" Vector__XXX
+ SG_ AccelerationY : 14|14@1- (0.001,0) [-8.192|8.19175] "g" Vector__XXX
+ SG_ AccelerationZ : 28|14@1- (0.001,0) [-8.192|8.191] "g" Vector__XXX
 
 
 
@@ -70,6 +70,6 @@ BA_DEF_DEF_  "BusType" "";
 BA_DEF_DEF_  "ProtocolType" "";
 BA_DEF_DEF_  "MessageIgnore" 0;
 BA_DEF_DEF_  "SignalIgnore" 0;
-BA_ "BusType" "CAN";
 BA_ "ProtocolType" "";
+BA_ "BusType" "CAN";
 
