@@ -48,3 +48,9 @@ TODO add [Youtube video for reference](TODO)
   | [BNO086](https://www.digikey.com/en/products/detail/ceva-technologies-inc/BNO086/14114190)                                       | Active, Updated from 085 | 13.93 |
   | [ICM-42688-P](https://www.digikey.com/en/products/detail/tdk-invensense/ICM-42688-P/10824934?s=N4IgTCBcDaIJYGMC2AWMA2AHJkBdAvkA) | Active, TODO             | 4.91  |
   | [ICM-42670-P](https://www.digikey.com/en/products/detail/tdk-invensense/ICM-42670-P/14319524)                                    | Active, TODO             | 3.54  |
+
+- Standalone Magnetometer
+
+  | Chip                                                                                                                                                                                                                                                                                                                                                                                                                                         | Features | Cost |
+  | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---- |
+  | [List](https://www.digikey.com/en/products/filter/magnetic-sensors/linear-compass-ics/554?s=N4IgjCBcoGwJxVAYygMwIYBsDOBTANCAPZQDaIALAAxwDMdIAuoQA4AuUIAymwE4CWAOwDmIAL6EATGBiIQKSBhwFiZcCEIVJk2lQjMQ7TjwEjxUgOyzo8tFjyESkcmEkWaEQq4tgZG8JIAHBYWtP6uwXBU4bpBFP4ArIG0YGGESdKBiXAJIYnwevm0CZIxugmyXrTlFjEwkjDRVfUWCFUWFPThFpJUFf69SXCVIDAUYD2lUlSB8G0gvcHSTKwckNx8QqIS4HCBCDYKSg6qziDRjDsAtKWHUHwAripO5AlMYjvWoPwAJpxXYEKq04-jYAE8WLhOD9sCgPkA) | To check | 0.0  |
