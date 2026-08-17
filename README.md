@@ -1,6 +1,7 @@
 # ESP32-based CAN Datalogger
 
-TODO add [animation](./ppt/esp32-can_datalogger_fb.mp4)
+https://github.com/user-attachments/assets/c7fbb97f-a418-43c2-a8ee-cc5cfcadf146
+
 TODO add [Youtube video for reference](TODO)
 
 ## Idea
