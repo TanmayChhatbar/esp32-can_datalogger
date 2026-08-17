@@ -1,6 +1,6 @@
 # ESP32-based CAN Datalogger
 
-https://github.com/user-attachments/assets/c7fbb97f-a418-43c2-a8ee-cc5cfcadf146
+https://github.com/user-attachments/assets/50ae6a31-43c1-45fb-a447-b922d48a3503
 
 [More information on YouTube](https://youtu.be/qLKWpdkve9A)
 
