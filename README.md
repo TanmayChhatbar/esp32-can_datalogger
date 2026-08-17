@@ -2,7 +2,7 @@
 
 https://github.com/user-attachments/assets/c7fbb97f-a418-43c2-a8ee-cc5cfcadf146
 
-TODO add [Youtube video for reference](TODO)
+[More information on YouTube](https://youtu.be/qLKWpdkve9A)
 
 ## Idea
 
