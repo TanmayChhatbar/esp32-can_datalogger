@@ -42,6 +42,7 @@ constexpr float BUTS_V[] = {1.31f, 0.0f};
 #define SERIAL_IMU 0
 #define SERIAL_CAN0 1
 #define SERIAL_CAN1 1
+#define SERIAL_OBD 1 // useless if SERIAL_CAN1=1
 #define SERIAL_OBD_REQUESTS 0
 #define SERIAL_PRINT_CAN 1
 #define SERIAL_COMMANDS 1

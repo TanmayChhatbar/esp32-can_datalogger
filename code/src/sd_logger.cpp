@@ -56,7 +56,14 @@ bool writeCanFrameToSD(const log_frame_t &log_frame, File &file)
 #if !SERIAL_CAN1
     if (log_frame.bus_id == 1)
     {
+#if !SERIAL_OBD
         return true;
+#else
+        if (!(log_frame.header.id >= 0x7E8 && log_frame.header.id <= 0x7EF && log_frame.header.dlc > 2))
+        {
+            return true;
+        }
+#endif
     }
 #endif
     Serial.println(buf);

@@ -108,6 +108,13 @@ void vTask_OBD_Request_10Hz(void *parameter)
         twai_node_status_t status_info;
         twai_node_get_info(bus1, &status_info, NULL);
 
+        // if slower task is pending
+        if (micros() - lastOBDRequestTime_1Hz_us < 10000)
+        {
+            vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(1)); // wait for 1Hz to be done
+            continue;
+        }
+
         // if starting fresh, wait 1Hz equivalent time
         if (OBD_sigCount_10Hz_index == -1)
         {
@@ -620,8 +627,8 @@ void loop()
             }
         }
 
-        // if no OBD responses received for 5 seconds, switch to active mode without CAN
-        if (logging_mode == LOGGING_MODE_ACTIVE_CAN && currentTime_ms - lastOBDReceiveTime_ms > 5000)
+        // if no OBD responses received for 2 seconds, switch to active mode without CAN
+        if (logging_mode == LOGGING_MODE_ACTIVE_CAN && currentTime_ms - lastOBDReceiveTime_ms > 2000)
         {
             logging_mode = LOGGING_MODE_ACTIVE;
         }
