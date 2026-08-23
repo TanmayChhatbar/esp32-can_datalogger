@@ -679,9 +679,6 @@ void loop()
         size_t log_file_size = log_file.size();
         Serial.print("Logging stopped: ");
         Serial.print(log_file.path());
-        Serial.print(" (");
-        Serial.print(log_file_size);
-        Serial.print(" bytes) ");
         if (log_file_size > 1024 * 1024)
         {
             Serial.print("(");
@@ -696,7 +693,9 @@ void loop()
         }
         else
         {
-            Serial.println();
+            Serial.print(" (");
+            Serial.print(log_file_size);
+            Serial.print(" B) ");
         }
         log_file.close();
         logging_mode = LOGGING_MODE_INACTIVE;

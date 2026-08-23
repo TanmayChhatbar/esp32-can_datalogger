@@ -30,6 +30,7 @@ private:
     unsigned long long _long_press_timer_ms;
     bool _is_initialized = false;
     float *_voltages = nullptr;
+    unsigned int _num_buttons = 0;
 };
 
 String buttonStateToString(button_state_t);

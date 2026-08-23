@@ -8,6 +8,7 @@ bool Button::begin(unsigned int pin_number,
     _pin_number = pin_number;
     _long_press_timer_ms = long_press_timer_ms;
     _state = {.state = BUTTON_NOT_PRESSED, .button_index = -1};
+    _num_buttons = num_buttons;
 
     _voltages = new float[num_buttons];
     for (int i = 0; i < num_buttons; i++)
@@ -28,11 +29,11 @@ button_state_t Button::readButtonState()
         return _state;
     }
     unsigned long current_timer_ms = millis();
-    float v_tmp = analogRead(_pin_number) * (3.3f / 4095.0f);
-    float current_voltage = v_tmp; // TODO filtering
+    float current_voltage = analogRead(_pin_number) * (3.3f / 4095.0f);
+
     // find voltage close in _voltages array
     int button_index_tmp = -1;
-    for (unsigned int i = 0; i < NUMBUTS; i++)
+    for (unsigned int i = 0; i < _num_buttons; i++)
     {
         if (fabs(current_voltage - _voltages[i]) < 0.1f)
         {
@@ -90,18 +91,25 @@ String buttonStateToString(button_state_t st)
     {
     case BUTTON_NOT_PRESSED:
         result += "BUTTON_NOT_PRESSED";
+        break;
     case BUTTON_PRESSED:
         result += "BUTTON_PRESSED";
+        break;
     case BUTTON_FRESH_PRESSED:
         result += "BUTTON_FRESH_PRESSED";
+        break;
     case BUTTON_SHORT_PRESS_CONFIRMED:
         result += "BUTTON_SHORT_PRESS_CONFIRMED";
+        break;
     case BUTTON_LONG_PRESS_CONFIRMED:
         result += "BUTTON_LONG_PRESS_CONFIRMED";
+        break;
     case BUTTON_LONG_PRESS_CONTINUED:
         result += "BUTTON_LONG_PRESS_CONTINUED";
+        break;
     default:
         result += "BUTTON_PRESS_UNKNOWN";
+        break;
     }
     return result;
 }
