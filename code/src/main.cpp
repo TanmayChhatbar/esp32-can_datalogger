@@ -10,6 +10,7 @@
 #include "button.hpp"
 #include "wifi_utils.h"
 #include <ArduinoOTA.h>
+#include "tpmss.h"
 
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
@@ -381,6 +382,11 @@ void setup()
     // set up buttons TODO multi button
     but1.begin(BUTS, 750, NUMBUTS, BUTS_V);
 
+    // set up TPMS
+    Serial.println("TPMS");
+    setupTPMS();
+    Serial.println("\tInitialized");
+
     // set up GPS
     Serial.println("GPS");
     while (!setupGPS())
@@ -651,6 +657,9 @@ void loop()
                 }
             }
         }
+
+        // TPMS
+        scanTPMS();
 
         break;
     }
