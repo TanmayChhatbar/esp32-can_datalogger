@@ -21,4 +21,4 @@ extern BLEScan *pBLEScan;
 
 void setupTPMS();
 void scanTPMS();
-bool TPMSFrameToCanFrame(const tpms_t &tpms_data, log_frame_t tpms_frame);
+bool TPMSFrameToCanFrame(const tpms_t &tpms_data, log_frame_t &tpms_frame);

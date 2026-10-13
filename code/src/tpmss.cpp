@@ -16,40 +16,45 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
         {
             if (dev.getAddress().toString() == tpms[i].id)
             {
-                // extract manufacturer data
+                // manufacturer data contains the pressure and temperature data
                 String data = dev.getManufacturerData();
                 if (data.length() > 4)
                 {
-                    // decoded
-                    float pressure = (float)((uint8_t)data[3] << 8 | (uint8_t)data[4]) / 10.0;
-                    float temperature = (float)((uint8_t)data[2]);
-                    Serial.printf("TPMS %s\tPressure: %.1f psi\tTemperature: %.1f degC\n", tpms[i].name, pressure, temperature);
+                    // decode and store
+                    tpms[i].pressure = (float)((uint8_t)data[3] << 8 | (uint8_t)data[4]) / 10.0;
+                    tpms[i].temperature = (float)((uint8_t)data[2]);
+                    Serial.printf("TPMS %s\tPressure: %.1f psi\tTemperature: %.1f degC\n", tpms[i].name, tpms[i].pressure, tpms[i].temperature);
 
                     log_frame_t tpms_frame = {};
-                    if (TPMSFrameToCanFrame(tpms[i], tpms_frame))
+                    unsigned long long timestamp_us = esp_timer_get_time();
+                    tpms_frame.header.timestamp = timestamp_us + epoch_offset_us;
+                    tpms_frame.bus_id = 2;
+
+                    if (TPMSFrameToCanFrame(tpms[i], tpms_frame) && canRxQueue != nullptr)
                     {
-                        if (canRxQueue != nullptr)
-                        {
-                            for (int i = 0; i < 2; i++)
-                            {
-                                xQueueSend(canRxQueue, &tpms_frame, 0);
-                            }
-                        }
+                        xQueueSend(canRxQueue, &tpms_frame, 0);
                     }
                 }
+
+                return;
             }
         }
     }
 };
 
+void onScanComplete(BLEScanResults results)
+{
+    // do nothing
+}
+
 void setupTPMS()
 {
     BLEDevice::init("");
-    pBLEScan = BLEDevice::getScan(); // create new scan
+    pBLEScan = BLEDevice::getScan();
     pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
-    pBLEScan->setActiveScan(true); // active scan uses more power, but get results faster
+    pBLEScan->setActiveScan(true);
     pBLEScan->setInterval(100);
-    pBLEScan->setWindow(99); // less or equal setInterval value
+    pBLEScan->setWindow(99);
 }
 
 void scanTPMS()
@@ -58,12 +63,12 @@ void scanTPMS()
     {
         return;
     }
-    pBLEScan->start(scanTime, false);
-    pBLEScan->clearResults(); // delete results fromBLEScan buffer to release memory
+    pBLEScan->start(scanTime, onScanComplete, false);
+    pBLEScan->clearResults();
     last_scan_time = millis();
 }
 
-bool TPMSFrameToCanFrame(const tpms_t &tpms_data, log_frame_t tpms_frame)
+bool TPMSFrameToCanFrame(const tpms_t &tpms_data, log_frame_t &tpms_frame)
 {
     tpms_frame.header.id = TPMS_TPMS_FRAME_ID;
     tpms_frame.header.dlc = TPMS_TPMS_LENGTH;
