@@ -1,6 +1,7 @@
 #pragma once
 #include "defs.h"
 #include "can.h"
+#include "tpms.h"
 #include "can_imu_14bit.h"
 #include "canmod_gps.h"
 #include <SPI.h>

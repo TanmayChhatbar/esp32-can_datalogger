@@ -13,6 +13,7 @@ https://github.com/user-attachments/assets/50ae6a31-43c1-45fb-a447-b922d48a3503
 - Onboard IMU
 - External antenna
 - Onboard button cell for hot-starts
+- TPMS (for BLE-based sensors)
 
 ## Hardware
 

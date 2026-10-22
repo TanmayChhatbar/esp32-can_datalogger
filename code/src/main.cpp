@@ -10,6 +10,7 @@
 #include "button.hpp"
 #include "wifi_utils.h"
 #include <ArduinoOTA.h>
+#include "tpmss.h"
 
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
@@ -85,7 +86,7 @@ void vTask_OBD_Request_1Hz(void *parameter)
         }
         else
         {
-            Serial.println("(vT_1Hz)\tTX queue full, skipping request");
+            // Serial.println("(vT_1Hz)\tTX queue full, skipping request");
         }
 
         vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(5)); // repeat every 5ms
@@ -157,7 +158,7 @@ void vTask_OBD_Request_10Hz(void *parameter)
         }
         else
         {
-            Serial.println("(vT_10Hz)\tTX queue full, skipping request");
+            // Serial.println("(vT_10Hz)\tTX queue full, skipping request");
         }
 
         vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(5)); // repeat every 5ms
@@ -380,6 +381,11 @@ void setup()
 
     // set up buttons TODO multi button
     but1.begin(BUTS, 750, NUMBUTS, BUTS_V);
+
+    // set up TPMS
+    Serial.println("TPMS");
+    setupTPMS();
+    Serial.println("\tInitialized");
 
     // set up GPS
     Serial.println("GPS");
@@ -651,6 +657,9 @@ void loop()
                 }
             }
         }
+
+        // TPMS
+        scanTPMS();
 
         break;
     }

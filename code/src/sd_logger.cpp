@@ -26,6 +26,12 @@ bool writeCanFrameToSD(const log_frame_t &log_frame, File &file)
 
     // print to serial for printing
 #if SERIAL_PRINT_CAN
+#if !SERIAL_TPMS
+    if (log_frame.header.id == TPMS_TPMS_FRAME_ID)
+    {
+        return true;
+    }
+#endif
 #if !SERIAL_GPS
     if (log_frame.header.id == CANMOD_GPS_GNSS_STATUS_FRAME_ID ||
         log_frame.header.id == CANMOD_GPS_GNSS_TIME_FRAME_ID ||
