@@ -4,6 +4,7 @@
 #include "led.h"
 #include "can.h"
 #include "canmod_gps.h"
+#include "yamaha_r7.h"
 #include "sd_logger.h"
 #include "imu.h"
 #include "gps.h"
@@ -474,6 +475,16 @@ void setup()
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 
+bool isEngineRunning(log_frame_t &log_frame)
+{
+    yamaha_r7_msg_20_a_t msg_20_a = {};
+    yamaha_r7_msg_20_a_unpack(&msg_20_a, log_frame.data, log_frame.header.dlc);
+    return (msg_20_a.engine_speed > 0);
+}
+
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
 void loop()
 {
     // init local vars
@@ -483,6 +494,7 @@ void loop()
     static bool last_gps_fix_state = false;
     static bool gps_fix_var = true;
     static unsigned long lastOBDReceiveTime_ms = wait_gps_start_ms;
+    static unsigned long last_engine_on_time_ms = millis();
 
     // logging actions
     switch (logging_mode)
@@ -527,6 +539,23 @@ void loop()
     case LOGGING_MODE_INACTIVE:
     {
         // TODO keep checking sensor state
+
+        // check if engine RPM is not zero
+        if (canRxQueue != nullptr)
+        {
+            log_frame_t log_frame = {};
+            if (xQueueReceive(canRxQueue, &log_frame, 0) == pdTRUE)
+            {
+                if (log_frame.bus_id == 1 && log_frame.header.id == YAMAHA_R7_MSG_20_A_FRAME_ID)
+                {
+                    if (isEngineRunning(log_frame))
+                    {
+                        last_engine_on_time_ms = millis();
+                        logging_mode = LOGGING_MODE_START;
+                    }
+                }
+            }
+        }
         break;
     }
 
@@ -601,29 +630,46 @@ void loop()
             if (xQueueReceive(canRxQueue, &log_frame, 0) == pdTRUE)
             {
                 // OBD response handling
-                if (log_frame.bus_id == 1 && log_frame.header.id >= 0x7E8 && log_frame.header.id <= 0x7EF && log_frame.header.dlc > 2)
+                if (log_frame.bus_id == 1)
                 {
-                    uint8_t mode = log_frame.data[1]; // should be 0x41 for response to 01
-                    uint8_t pid = log_frame.data[2];
-                    if (mode == 0x41)
+                    if (log_frame.header.id >= 0x7E8 && log_frame.header.id <= 0x7EF && log_frame.header.dlc > 2)
                     {
-                        if (pid == OBD_1Hz_ID)
+                        uint8_t mode = log_frame.data[1]; // should be 0x41 for response to 01
+                        uint8_t pid = log_frame.data[2];
+                        if (mode == 0x41)
                         {
-                            OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 1)) - 1; // increment and wait at -1
-                            logging_mode = LOGGING_MODE_ACTIVE_CAN;
-                            lastOBDReceiveTime_ms = currentTime_ms;
+                            if (pid == OBD_1Hz_ID)
+                            {
+                                OBD_sigCount_1Hz_index = ((OBD_sigCount_1Hz_index + 2) % (OBD_SIGCOUNT_1HZ + 1)) - 1; // increment and wait at -1
+                                logging_mode = LOGGING_MODE_ACTIVE_CAN;
+                                lastOBDReceiveTime_ms = currentTime_ms;
 #if SERIAL_OBD_REQUESTS
-                            Serial.println("\t\tReceived: " + OBDSignalToString(OBD_1Hz_ID));
+                                Serial.println("\t\tReceived: " + OBDSignalToString(OBD_1Hz_ID));
 #endif
+                            }
+                            if (pid == OBD_10Hz_ID)
+                            {
+                                OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 1)) - 1; // increment and wait at -1
+                                logging_mode = LOGGING_MODE_ACTIVE_CAN;
+                                lastOBDReceiveTime_ms = currentTime_ms;
+#if SERIAL_OBD_REQUESTS
+                                Serial.println("\t\tReceived: " + OBDSignalToString(OBD_10Hz_ID));
+#endif
+                            }
                         }
-                        if (pid == OBD_10Hz_ID)
+                    }
+                    else if (log_frame.header.id == YAMAHA_R7_MSG_20_A_FRAME_ID)
+                    {
+                        // track if engine is running
+                        if (isEngineRunning(log_frame))
                         {
-                            OBD_sigCount_10Hz_index = ((OBD_sigCount_10Hz_index + 2) % (OBD_SIGCOUNT_10HZ + 1)) - 1; // increment and wait at -1
-                            logging_mode = LOGGING_MODE_ACTIVE_CAN;
-                            lastOBDReceiveTime_ms = currentTime_ms;
-#if SERIAL_OBD_REQUESTS
-                            Serial.println("\t\tReceived: " + OBDSignalToString(OBD_10Hz_ID));
-#endif
+                            last_engine_on_time_ms = millis();
+                            logging_mode = LOGGING_MODE_START;
+                        }
+                        else if (millis() - last_engine_on_time_ms > 10000)
+                        {
+                            // only handle zero speed if message was received
+                            logging_mode = LOGGING_MODE_STOP;
                         }
                     }
                 }
